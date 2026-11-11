@@ -1,0 +1,182 @@
+---
+title: '6. Filtering'
+summary: Show all tasks, only the open ones, or only the finished ones, and clear out everything that is finished with one click.
+section: tutorial
+order: 6
+cover: tutorial/shot-filtered
+types: [Kirigami.Action, KSortFilterProxyModel]
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="tutorial/shot-filtered"
+  alt="The app with two new buttons in the header, Show and Clear Completed. Only the two unfinished tasks are listed."
+  caption="With “Active” chosen in the Show menu, the finished task is hidden."
+  code={false}
+/>
+
+## A filter between data and list
+
+We do not want to remove finished tasks from the model when the filter says “Active”; we only want the list
+not to *show* them. The tool for this is a **proxy model**: it sits between the real model and the view and
+lets through only the rows that pass a test.
+
+KDE provides one. Add its import:
+
+```qml
+import org.kde.kitemmodels as KItemModels
+```
+
+Then add this to the window:
+
+```qml
+property string filter: "all"
+onFilterChanged: visibleTasks.invalidateFilter()
+
+KItemModels.KSortFilterProxyModel {
+    id: visibleTasks
+    sourceModel: tasksModel
+
+    filterRowCallback: (row, parent) => {
+        const done = tasksModel.get(row).done
+        return root.filter === "all"
+            || (root.filter === "active" && !done)
+            || (root.filter === "completed" && done)
+    }
+}
+```
+
+- **`filter`** holds the current choice as a word.
+- **`filterRowCallback`** is the test. It is asked about each row of the real model and answers `true` to
+  show it.
+- **`invalidateFilter()`** tells the proxy to ask again. We call it whenever the choice changes.
+
+Point the list at the proxy instead of the real model:
+
+```qml
+ListView {
+    id: tasksView
+    model: visibleTasks
+```
+
+The proxy must also re-check when a task is ticked, or a task finished while “Active” is showing would stay
+on screen. Extend the `Connections` from the last step:
+
+```qml
+function onDataChanged() {
+    root.recount()
+    visibleTasks.invalidateFilter()
+}
+```
+
+## Row numbers no longer match
+
+There is one catch. With a filter on, the second row *on screen* may be the fifth row *in the data*. The
+delegate's `index` is the on-screen number, but `setProperty` and `deleteTask` need the real one.
+
+A small function translates:
+
+```qml
+function sourceRow(row: int): int {
+    return visibleTasks.mapToSource(visibleTasks.index(row, 0)).row
+}
+```
+
+Use it in the three places where the delegate touches the model:
+
+```qml
+onClicked: tasksModel.setProperty(root.sourceRow(index), "done", !done)
+// …
+onToggled: tasksModel.setProperty(root.sourceRow(row.index), "done", checked)
+// …
+onClicked: root.deleteTask(root.sourceRow(row.index))
+```
+
+## The buttons
+
+<Example
+  name="tutorial/step6"
+  alt="The app with all three tasks shown and the Show and Clear Completed buttons in the header"
+  caption="The header now has two actions."
+  codeLabel="Show the complete main.qml for this step"
+/>
+
+Give the page a list of `actions`:
+
+```qml
+actions: [
+    Kirigami.Action {
+        text: "Show"
+        icon.name: "view-filter"
+
+        Kirigami.Action {
+            text: "All Tasks"
+            checkable: true
+            autoExclusive: true
+            checked: root.filter === "all"
+            onTriggered: root.filter = "all"
+        }
+        Kirigami.Action {
+            text: "Active"
+            checkable: true
+            autoExclusive: true
+            checked: root.filter === "active"
+            onTriggered: root.filter = "active"
+        }
+        Kirigami.Action {
+            text: "Completed"
+            checkable: true
+            autoExclusive: true
+            checked: root.filter === "completed"
+            onTriggered: root.filter = "completed"
+        }
+    },
+    Kirigami.Action {
+        text: "Clear Completed"
+        icon.name: "edit-clear-all"
+        enabled: root.remaining < tasksModel.count
+        onTriggered: root.clearCompleted()
+    }
+]
+```
+
+- Actions placed on a page appear in its header. Notice that we never say *where*: on a phone the same actions
+  show up in a bar at the bottom. See [Actions and toolbars](/components/actions/).
+- **An action with actions inside it becomes a menu.** “Show” opens a menu with the three choices.
+- **`checkable` with `autoExclusive`** makes the three behave like radio buttons: exactly one is ticked.
+- **“Clear Completed” is disabled** when nothing is finished. `remaining < count` is true exactly when at
+  least one task is done.
+
+And the function it calls:
+
+```qml
+function clearCompleted(): void {
+    for (let i = tasksModel.count - 1; i >= 0; i--) {
+        if (tasksModel.get(i).done) {
+            tasksModel.remove(i)
+        }
+    }
+}
+```
+
+It walks the list from the end to the start. Going forwards would skip a task each time one is removed, because
+everything after it moves up by one.
+
+## One more empty state
+
+With a filter, the list can be empty although tasks exist. The placeholder should say so, instead of claiming
+there are no tasks:
+
+```qml
+text: tasksModel.count === 0 ? "No tasks" : "Nothing to show"
+explanation: tasksModel.count === 0
+    ? "Type in the field above and press Enter to add one."
+    : "No tasks match the current filter."
+```
+
+## Try it
+
+Choose “Active” and tick a task: it leaves the list. Choose “Completed” to find it again. Make the window
+very narrow and watch “Clear Completed” move into an overflow menu.

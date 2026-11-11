@@ -1,0 +1,110 @@
+---
+title: Cards
+summary: A card groups a picture, some text and a few actions about one thing into a single framed block.
+section: components
+order: 4
+cover: components/card
+types: [Kirigami.Card, Kirigami.AbstractCard, Kirigami.CardsLayout, Kirigami.CardsListView]
+sources:
+  - label: 'Kirigami tutorial: Cards'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-card/
+  - label: 'KDE HIG: Displaying content'
+    url: https://develop.kde.org/hig/displaying_content/
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="components/card"
+  alt="A card with a landscape picture across the top carrying the title Alpine Loop, two lines of description below it, and two buttons, Directions and Save, at the bottom"
+  caption="A <code>Kirigami.Card</code> and its four parts."
+  markers={[
+    { x: 30, y: 22, label: '<strong>Banner.</strong> An optional image across the top.' },
+    { x: 38, y: 52, label: '<strong>Title.</strong> Drawn over the banner, on a darkened strip so it stays readable on any picture.' },
+    { x: 40, y: 71, label: '<strong>Content.</strong> Any item; usually a short text.' },
+    { x: 59, y: 82.5, label: '<strong>Actions.</strong> Up to a few buttons that act on this one thing.' },
+  ]}
+/>
+
+## When to use cards
+
+Use cards for a collection of **separate things that each have their own picture or their own actions**: albums,
+places, add-ons, devices, news items.
+
+Do not use cards for:
+
+- **Plain lists of text.** Rows in a `ListView` are denser and easier to scan. The guidelines put it this way:
+  lists suit text, grids and cards suit visual content.
+- **Settings.** Use a [form layout](/components/form-layout/).
+- **Wrapping a whole page.** A card is one item among several, not a frame around everything.
+
+## Card or AbstractCard?
+
+| Type | Use it when |
+| --- | --- |
+| `Kirigami.Card` | You want the standard arrangement: banner, title, content, actions. |
+| `Kirigami.AbstractCard` | You only want the framed surface and will lay out the inside yourself. |
+
+<Example
+  name="components/cards-layout"
+  alt="Four small cards in two columns, each with an icon, a title and one line of status: Storage, Battery, Network and Updates"
+  caption="Four cards of type <code>AbstractCard</code> in a <code>CardsLayout</code>. Each has a custom row as its content."
+/>
+
+## Arranging several cards
+
+| Type | What it does |
+| --- | --- |
+| `Kirigami.CardsLayout` | A grid for a known, small number of cards. It picks the number of columns from the available width and gives every card in a row the same size. |
+| `Kirigami.CardsListView` | A scrolling list of cards generated from a model. Use it when the number of cards is large or unknown; it only creates the cards that are on screen. |
+
+Put a `CardsLayout` inside a `Kirigami.ScrollablePage` so the cards can scroll when the window is small. A
+`CardsListView` scrolls by itself and should be the direct child of the scrollable page.
+
+## Using cards well
+
+- **One subject per card.** If the title needs an “and”, it is two cards.
+- **Keep text short.** Two or three lines. Longer text belongs on the page the card leads to.
+- **Few actions.** Two or three, most important first. Like a toolbar, a card moves actions that do not fit into
+  an overflow menu, so give each one a text and an icon. See [Actions and toolbars](/components/actions/).
+- **Make it obvious if the whole card is clickable.** Set `showClickFeedback: true` so the card reacts to hover
+  and press.
+- **Use the same kind of banner on every card in a group**, or on none. A mix of cards with and without pictures
+  looks broken.
+
+<Callout title="Card colours">
+  Cards use the `View` colour set and draw their own outline, so they stand out from the window background in
+  both light and dark schemes. You do not need to set colours on them. See [Colour](/foundations/colour/).
+</Callout>
+
+## Properties you will use
+
+### Kirigami.Card
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `banner.source` | url | The image across the top. |
+| `banner.title` | string | Title drawn over the banner. |
+| `banner.titleIcon` | string | Icon name shown beside the title. |
+| `banner.titleAlignment` | alignment | Where on the banner the title sits, for example `Qt.AlignLeft \| Qt.AlignBottom`. |
+| `banner.titleLevel` | int | Heading level of the title. See [Typography](/foundations/typography/). |
+| `contentItem` | item | The body of the card. |
+| `actions` | list of actions | Buttons along the bottom. |
+
+### Kirigami.AbstractCard (also available on Card)
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `header`, `footer` | item | Items above and below the content. |
+| `contentItem` | item | The body of the card. |
+| `showClickFeedback` | bool | Makes the card react to hover and press. Default `false`. |
+| `onClicked` | handler | Runs when the card is clicked. |
+
+### Kirigami.CardsLayout
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `maximumColumns` | int | Most columns to use. Default `2`. |
+| `minimumColumnWidth` | number | Below this width a column is dropped. Default 12 grid units. |
+| `maximumColumnWidth` | number | Cards do not grow wider than this. Default 20 grid units. |

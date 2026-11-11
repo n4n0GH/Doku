@@ -1,0 +1,164 @@
+---
+title: List items
+summary: The rows of a list. Qt and Kirigami provide ready-made ones for the common cases, so rows look and behave the same in every app.
+section: components
+order: 3
+cover: components/list-basic
+types: [QQC2.ItemDelegate, KD.SubtitleDelegate, KD.CheckSubtitleDelegate, Kirigami.ListSectionHeader, Kirigami.InlineViewHeader]
+sources:
+  - label: 'Kirigami tutorial: List views'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-listview/
+  - label: 'KDE HIG: Displaying content'
+    url: https://develop.kde.org/hig/displaying_content/
+  - label: 'KDE HIG: Layout and navigation (Spacings and sizes)'
+    url: https://develop.kde.org/hig/layout_and_nav/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+A list has three parts: a `ListView`, a **model** that holds the data, and a **delegate**, which is the template
+for one row. This page is about the delegate. For when to use a list at all, see
+[Showing collections](/patterns/collections/).
+
+<Example
+  name="components/list-basic"
+  alt="A list of five notes in two groups headed Personal and Work. Each row has a small icon and a name; one row is highlighted in blue."
+  caption="Standard rows with section headers. The highlighted row is the current item."
+/>
+
+## Which delegate
+
+Use a ready-made delegate. They already have the right height, padding, icon size, hover and focus effects, and
+they work with keyboard and touch.
+
+| A row shows… | Use | From |
+| --- | --- | --- |
+| One line of text, optional icon | `QQC2.ItemDelegate` | Qt Quick Controls |
+| The same, with a checkbox, radio button or switch | `QQC2.CheckDelegate`, `RadioDelegate`, `SwitchDelegate` | Qt Quick Controls |
+| A title and a subtitle | `KD.SubtitleDelegate` | Kirigami |
+| Title, subtitle and a checkbox, radio button or switch | `KD.CheckSubtitleDelegate`, `RadioSubtitleDelegate`, `SwitchSubtitleDelegate` | Kirigami |
+
+Prefer the Qt ones when one line is enough. The Kirigami delegates live in their own module:
+
+```qml
+import org.kde.kirigami.delegates as KD
+```
+
+### Two lines
+
+<Example
+  name="components/list-subtitles"
+  alt="Four network connections, each with a larger icon, a name, and a smaller grey status line below it"
+  caption="<code>KD.SubtitleDelegate</code>. Rows with a subtitle get a larger icon than one-line rows."
+/>
+
+### Rows that can be ticked
+
+<Example
+  name="components/list-check"
+  alt="Three folders with a checkbox at the start of each row; two are ticked"
+  caption="<code>KD.CheckSubtitleDelegate</code>. Clicking anywhere on the row toggles it."
+/>
+
+### Something else
+
+When no ready-made delegate fits, keep `QQC2.ItemDelegate` and replace only its inside, the `contentItem`.
+You keep the background, highlight and keyboard handling. Kirigami offers `KD.TitleSubtitle` and
+`KD.IconTitleSubtitle` as building blocks for this.
+
+## Sizing rows correctly
+
+A delegate must be told how wide it is. Always write it this way:
+
+```qml
+delegate: QQC2.ItemDelegate {
+    required property string name
+
+    width: ListView.view.width
+    text: name
+}
+```
+
+<Callout title="Not anchors" kind="warning">
+  Do not use `anchors.fill: parent` or `anchors.left: parent.left` on a delegate. A delegate's parent is an
+  internal item of the view, not the view, so anchoring to it gives wrong sizes. `ListView.view` always points
+  at the list the row belongs to.
+</Callout>
+
+Declare the pieces of data the row needs as `required property`, as above. The view fills them in from the
+model, and a typo in a name becomes an error instead of an empty row.
+
+## Section headers
+
+To group rows, tell the view which field to group by, and use `Kirigami.ListSectionHeader` for the heading:
+
+```qml
+ListView {
+    section.property: "folder"
+    section.delegate: Kirigami.ListSectionHeader {
+        required property string section
+        width: ListView.view.width
+        text: section
+    }
+}
+```
+
+The model must already be sorted by that field; the view only draws a header where the value changes.
+
+## A header for the whole list
+
+<Example
+  name="components/list-view-header"
+  alt="A list of three accounts below a header bar with the title Accounts and an Add Account button"
+  caption="<code>Kirigami.InlineViewHeader</code> gives a list a title and a place for its own actions."
+/>
+
+Use it for the name of the list and for [actions](/components/actions/) that concern the list as a whole, such
+as adding an item.
+
+## Icons in rows
+
+| Row | Icon size |
+| --- | --- |
+| One line of text | `iconSizes.smallMedium` (22 px) |
+| Title and subtitle | `iconSizes.medium` (32 px) |
+
+The ready-made delegates pick these for you. See [Icons](/foundations/icons/).
+
+## Using list items well
+
+- **Put the list directly inside a `Kirigami.ScrollablePage`**; it then needs no size or anchors. See
+  [Pages](/components/page/).
+- **Show an empty list as a [placeholder message](/components/placeholder-message/)**, not as blank space.
+- **Buttons on a row** go at its trailing end, icon only, always visible, two at most.
+- **Keep row text to one line** and let it elide (“…”) when it is too long. The delegates do this by default.
+
+## Properties you will use
+
+### On every delegate
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The main line. |
+| `icon.name` | string | Icon at the start of the row. |
+| `highlighted` | bool | Draws the row as the current one. Usually bound to `ListView.isCurrentItem`. |
+| `onClicked` | handler | Runs when the row is activated. |
+| `width` | number | Set to `ListView.view.width`. |
+
+### Extra on the Kirigami delegates
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `subtitle` | string | The second, quieter line. |
+| `checked` | bool | State of the checkbox, radio button or switch, on the delegates that have one. |
+
+### Kirigami.InlineViewHeader
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The title. |
+| `actions` | list of actions | Buttons at the trailing end. |

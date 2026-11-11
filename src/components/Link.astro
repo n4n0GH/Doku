@@ -1,0 +1,10 @@
+---
+// Used for every link in MDX content. Lets pages link to "/foundations/colour/"
+// and still work when the site is served from a sub-path such as /repo/.
+import { url } from '../lib/site';
+
+const { href = '', ...rest } = Astro.props;
+const resolved = href.startsWith('/') && !href.startsWith('//') ? url(href) : href;
+---
+
+<a href={resolved} {...rest}><slot /></a>

@@ -1,0 +1,129 @@
+---
+title: Inline messages
+summary: A coloured banner inside the page that tells the user something important and, ideally, offers a way to deal with it.
+section: components
+order: 10
+cover: components/inline-message-types
+types: [Kirigami.InlineMessage]
+sources:
+  - label: 'KDE HIG: Communicating status changes'
+    url: https://develop.kde.org/hig/status_changes/
+  - label: 'Kirigami tutorial: Inline messages'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-inlinemessages/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+An inline message sits in the page next to the content it is about. It does not block anything and does not
+disappear by itself, which makes it the right tool for things people need to notice and may want to act on.
+
+<Example
+  name="components/inline-message-types"
+  alt="Four banners stacked: a blue one for information, a green one for positive, an orange one for warning and a red one for error, each with a matching icon"
+  caption="The four types. Each has its own colour and its own icon, so the type is recognisable without relying on colour."
+/>
+
+## The four types
+
+| `type: Kirigami.MessageType.…` | Use it when |
+| --- | --- |
+| `Information` | Something is worth knowing but nothing is wrong. This is the default. |
+| `Positive` | A long or important task finished successfully. |
+| `Warning` | Something may go wrong, or needs attention soon. |
+| `Error` | Something failed. |
+
+## When to use one, and when not
+
+First ask whether a message is needed at all. The guidelines are firm that the best status message is none:
+
+- If something **succeeded**, show the result. The file appears in the list, the switch is on. Add a message only
+  for long tasks where the result is not visible.
+- If something **can be prevented or fixed automatically**, do that instead of reporting it.
+
+When you do need to say something inside the app, choose by importance:
+
+| Situation | Use |
+| --- | --- |
+| Minor, can be missed: “Copied to clipboard” | A passive notification: `applicationWindow().showPassiveNotification("…")`. It fades by itself. |
+| Should be noticed, may need action | `Kirigami.InlineMessage` |
+| Needs a decision before anything else can happen | A [dialog](/components/dialogs/) |
+| Happened while the app was in the background | A system notification |
+
+## Writing error messages
+
+Every error message must give the user something to do. In order of preference:
+
+1. **Prevent the error**, or recover silently. No message.
+2. Say what happened **and offer a button that fixes it**.
+3. Say what happened and **explain how to proceed**.
+4. Say only what happened. Acceptable when nothing can be done.
+
+Never show raw technical output, and never fail without saying anything.
+
+<Example
+  name="components/inline-message-actions"
+  alt="A red error banner reading The server did not respond. Check the network connection and try again, with Try Again and Network Settings buttons and a close button"
+  caption="What happened, what to do about it, and buttons that do it."
+/>
+
+<DoDont>
+  <Do sample="The server did not respond. Check the network connection and try again.">
+    Say what happened in plain words, then what the user can do.
+  </Do>
+  <Dont sample="Error: ECONNREFUSED (111)">
+    Show codes or internal messages. They mean nothing to most people and offer no next step.
+  </Dont>
+</DoDont>
+
+## In code
+
+An inline message is **hidden until you set `visible: true`**, and it animates in and out when that changes. Bind
+`visible` to the condition it reports:
+
+```qml
+Kirigami.InlineMessage {
+    Layout.fillWidth: true
+    visible: !network.online
+    type: Kirigami.MessageType.Warning
+    text: "You are offline. Changes will be uploaded when the connection returns."
+}
+```
+
+Give it the full width of its container (`Layout.fillWidth: true` in a layout).
+
+### A message about the whole page
+
+A message that concerns the entire page, not one part of it, goes directly under the header. Put it in the page's
+`header` and tell it where it is, so it draws edge to edge without rounded corners:
+
+```qml
+Kirigami.ScrollablePage {
+    header: Kirigami.InlineMessage {
+        position: Kirigami.InlineMessage.Position.Header
+        visible: !network.online
+        type: Kirigami.MessageType.Warning
+        text: "You are offline."
+    }
+}
+```
+
+<Callout title="Do not stack them">
+  Several banners at once compete with each other and push the content off the screen. Show the most important
+  one, or combine them into one message.
+</Callout>
+
+## Properties you will use
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The message. Short links written as HTML are allowed; handle them with `onLinkActivated`. |
+| `type` | enum | One of the four types above. Sets colour and icon. |
+| `visible` | bool | Shows or hides the message. Starts `false`. |
+| `actions` | list of actions | Buttons shown in the message. See [Actions and toolbars](/components/actions/). |
+| `showCloseButton` | bool | Adds a × that lets the user dismiss the message. Default `false`. |
+| `position` | enum | `Inline` (default), `Header` or `Footer`. Use the last two when the message is a page's header or footer. |
+| `icon.name` | string | Replaces the icon that the type provides. Rarely needed. |

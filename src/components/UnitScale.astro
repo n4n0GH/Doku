@@ -1,0 +1,29 @@
+---
+// Draws Kirigami.Units values as bars, enlarged so the differences are visible.
+import theme from '../data/theme-light.json';
+
+interface Props {
+  units: { name: string; note: string }[];
+  /** How many screen pixels represent one Kirigami pixel. */
+  zoom?: number;
+}
+
+const { units, zoom = 6 } = Astro.props;
+const values = theme.units as Record<string, number>;
+---
+
+<div class="scale" role="img" aria-label={`Relative sizes: ${units.map((u) => `${u.name} ${values[u.name]} pixels`).join(', ')}`}>
+  {
+    units.map((unit) => (
+      <div class="scale-row">
+        <div>
+          <code>{unit.name}</code>
+          <small>
+            {values[unit.name]} px · {unit.note}
+          </small>
+        </div>
+        <div class="scale-bar" style={`width:${values[unit.name] * zoom}px`} />
+      </div>
+    ))
+  }
+</div>

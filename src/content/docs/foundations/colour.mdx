@@ -1,0 +1,157 @@
+---
+title: Colour
+summary: Never write a colour value. Ask the theme for a role, and your app follows whatever colour scheme the user has chosen.
+section: foundations
+order: 1
+cover: foundations/colour-sets
+types: [Kirigami.Theme]
+sources:
+  - label: 'KDE HIG: Communicating status changes (Color)'
+    url: https://develop.kde.org/hig/status_changes/
+  - label: 'KDE HIG: Displaying content'
+    url: https://develop.kde.org/hig/displaying_content/
+  - label: 'Kirigami tutorial: Colors and themes'
+    url: https://develop.kde.org/docs/getting-started/kirigami/style-colors/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Swatches from '../../../components/Swatches.astro';
+import Callout from '../../../components/Callout.astro';
+
+People using Plasma choose their own colour scheme: light, dark, high contrast, or something they made themselves.
+An app cannot know in advance which colours it will be shown in. So instead of colour values, Kirigami gives you
+**roles** such as “normal text” or “background of an error”, and fills in the right value at run time.
+
+You read roles from `Kirigami.Theme`:
+
+```qml
+QQC2.Label {
+    text: "Could not connect"
+    color: Kirigami.Theme.negativeTextColor
+}
+```
+
+<DoDont>
+  <Do example="foundations/colour-themed" theme="dark" alt="An orange warning text on a dark panel, clearly readable">
+    Use theme roles. The same code is readable in light and dark schemes; this is how it looks in Breeze Dark.
+  </Do>
+  <Dont example="foundations/colour-hardcoded" theme="dark" alt="A glaring white panel with pale orange text that is hard to read">
+    Write colour values such as `"#ffffff"`. The same panel in Breeze Dark is a glaring white box with text that
+    is hard to read.
+  </Dont>
+</DoDont>
+
+## Colour roles
+
+These are the roles you will use most. The values shown are the stock Breeze ones; your users may see others.
+
+### Text and background
+
+<Swatches
+  roles={[
+    { name: 'textColor', meaning: 'Normal text and symbolic icons.' },
+    { name: 'disabledTextColor', meaning: 'Text of something that cannot be used right now.' },
+    { name: 'backgroundColor', meaning: 'The surface behind content.' },
+    { name: 'alternateBackgroundColor', meaning: 'Every second row in a list or table with striped rows.' },
+    { name: 'linkColor', meaning: 'Links that open a web address.' },
+    { name: 'visitedLinkColor', meaning: 'Links the user has already opened.' },
+  ]}
+/>
+
+### Selection and focus
+
+<Swatches
+  roles={[
+    { name: 'highlightColor', meaning: 'Background of selected items and checked controls.' },
+    { name: 'highlightedTextColor', meaning: 'Text drawn on top of the highlight colour.' },
+    { name: 'hoverColor', meaning: 'Outline of the control under the pointer.' },
+    { name: 'focusColor', meaning: 'Outline of the control that has keyboard focus.' },
+  ]}
+/>
+
+### Status
+
+Each status has a text colour and a soft background to go behind it.
+
+<Swatches
+  roles={[
+    { name: 'positiveTextColor', meaning: 'Success, safe, finished.' },
+    { name: 'positiveBackgroundColor', meaning: 'Background behind positive content.' },
+    { name: 'neutralTextColor', meaning: 'Warnings, and settings changed from their default.' },
+    { name: 'neutralBackgroundColor', meaning: 'Background behind a warning.' },
+    { name: 'negativeTextColor', meaning: 'Errors and dangerous actions.' },
+    { name: 'negativeBackgroundColor', meaning: 'Background behind an error.' },
+    { name: 'activeTextColor', meaning: 'Something that wants attention without being a problem.' },
+  ]}
+/>
+
+## Colour sets
+
+A window is not one flat colour. The area where content lives is brighter than the window chrome around it, buttons
+have their own surface, and a selected row is blue. Each of these surfaces is a **colour set**: the same list of
+roles, with different values.
+
+<Example
+  name="foundations/colour-sets"
+  alt="Seven rounded panels labelled View, Window, Button, Header, Selection, Tooltip and Complementary, each with its own background and text colour"
+  caption="The seven colour sets. Each panel uses <code>backgroundColor</code> and <code>textColor</code>; only the set differs."
+/>
+
+| Set | Where it is used |
+| --- | --- |
+| `View` | Where content lives: lists, text areas, the inside of cards. |
+| `Window` | The window background around views. This is the default. |
+| `Button` | The surface of buttons and similar controls. |
+| `Header` | Title bars and toolbars at the top of a page or window. |
+| `Selection` | Selected items. |
+| `Tooltip` | Tooltips. |
+| `Complementary` | A deliberately contrasting area, dark even in a light scheme. Used for overlays on images or video. |
+
+<Example
+  name="components/page"
+  alt="The notes app with markers on the header, the list area and the selected sidebar item"
+  caption="Colour sets in a real window."
+  code={false}
+  scale={0.9}
+  markers={[
+    { x: 57, y: 8.6, label: '<code>Header</code> set: slightly darker than the content, so the toolbar reads as chrome.' },
+    { x: 65, y: 60, label: '<code>View</code> set: the brightest surface, for content.' },
+    { x: 19, y: 7.8, label: '<code>highlightColor</code> marks the current destination.' },
+  ]}
+/>
+
+Controls and pages pick their set for you. You only set one yourself when you draw your own surface:
+
+```qml
+Rectangle {
+    // Use the View colours for this item and everything inside it.
+    Kirigami.Theme.colorSet: Kirigami.Theme.View
+    Kirigami.Theme.inherit: false
+
+    color: Kirigami.Theme.backgroundColor
+}
+```
+
+<Callout title="Why inherit: false?" kind="warning">
+  By default an item takes its colour set from its parent and ignores its own `colorSet`. Setting
+  `Kirigami.Theme.inherit: false` is what makes your choice take effect. Children of the item then inherit the new
+  set automatically.
+</Callout>
+
+## Colour and meaning
+
+<Example
+  name="foundations/colour-status"
+  alt="Four status lines: a green tick with Backup finished, an orange triangle with Battery is low, a red cross with Could not connect, and a blue i with 3 updates available"
+  caption="Each status is carried by an icon and words. The colour only reinforces it."
+/>
+
+- **Use colour sparingly.** A screen where many things are red or orange has no way left to signal a real problem.
+- **Never let colour be the only signal.** Roughly one in twelve men cannot tell red from green reliably. Pair the
+  colour with an icon, a shape or words, as in the picture above.
+- **Keep red for errors and destructive actions.** Do not use it for decoration or for actions that lose nothing.
+- **Outline things that float.** A popup or dialog over content needs a contrasting edge, because in dark schemes
+  its background is nearly the same as what is behind it. Kirigami's own dialogs and cards already do this.

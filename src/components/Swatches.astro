@@ -1,0 +1,52 @@
+---
+// A table of Kirigami.Theme colour roles with their real Breeze values,
+// read from the installed theme by tools/render/DumpTheme.qml.
+import light from '../data/theme-light.json';
+import dark from '../data/theme-dark.json';
+
+interface Props {
+  /** Colour set to read values from. */
+  set?: keyof typeof light.sets;
+  /** Roles to list, each with a plain-language meaning. */
+  roles: { name: string; meaning: string }[];
+}
+
+const { set = 'View', roles } = Astro.props;
+type Role = keyof (typeof light.sets)['View'];
+---
+
+<div class="table-scroll">
+  <table class="swatch-table">
+    <thead>
+      <tr>
+        <th>Role</th>
+        <th>Use it for</th>
+        <th>Breeze Light</th>
+        <th>Breeze Dark</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        roles.map((role) => (
+          <tr>
+            <td>
+              <code>{role.name}</code>
+            </td>
+            <td>{role.meaning}</td>
+            {[light, dark].map((theme) => {
+              const value = theme.sets[set][role.name as Role];
+              return (
+                <td>
+                  <span class="chip">
+                    <i style={`background:${value}`} />
+                    {value}
+                  </span>
+                </td>
+              );
+            })}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,123 @@
+---
+title: Form layout
+summary: FormLayout lines up labels and controls in two tidy columns, and rearranges them by itself when the window gets narrow.
+section: components
+order: 5
+cover: components/form-layout
+types: [Kirigami.FormLayout, Kirigami.FormData]
+sources:
+  - label: 'Kirigami tutorial: Form layouts'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-formlayouts/
+  - label: 'KDE HIG: Getting input'
+    url: https://develop.kde.org/hig/getting_input/
+  - label: 'KDE HIG: Text and labels'
+    url: https://develop.kde.org/hig/text_and_labels/
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+Settings pages and dialogs that ask for several values all share one look in KDE: labels on the left, aligned to
+the right; controls on the right, aligned to the left; the whole block centred. `Kirigami.FormLayout` produces
+this arrangement from a plain list of controls.
+
+<Example
+  name="components/form-layout"
+  alt="A form with right-aligned labels Name, Email, Theme and Text on the left and their controls on the right, with a centred section heading Appearance and a line between the two groups"
+  caption="Labels end at one shared vertical line and controls start right after it, so the eye can run down the middle."
+/>
+
+## How it works
+
+You put ordinary controls inside the `FormLayout`. On each one, you set an **attached property** to give it a label:
+
+```qml
+Kirigami.FormLayout {
+    QQC2.TextField {
+        Kirigami.FormData.label: "Name:"
+    }
+    QQC2.ComboBox {
+        Kirigami.FormData.label: "Theme:"
+        model: ["Follow system", "Light", "Dark"]
+    }
+}
+```
+
+`Kirigami.FormData.label` is not a property of the text field. It is a note attached to the text field that the
+surrounding `FormLayout` reads. You never create the label yourself, and you never position anything.
+
+### Several controls under one label
+
+A control without a label is placed in the control column, directly under the previous one. This is how the two
+checkboxes under “Text:” in the picture are made: only the first has a label.
+
+### Sections
+
+To split a long form, add a `Kirigami.Separator` marked as a section. With a label it becomes a section heading;
+without one it is simply extra space with a line.
+
+```qml
+Kirigami.Separator {
+    Kirigami.FormData.isSection: true
+    Kirigami.FormData.label: "Appearance"
+}
+```
+
+## Narrow windows
+
+<Example
+  name="components/form-layout-narrow"
+  alt="The same form in a narrow column: each label sits above its control and everything is left-aligned"
+  caption="When two columns no longer fit, labels move above their controls. You do not write any code for this."
+/>
+
+The switch happens automatically, based on the width the form is given. The property behind it is `wideMode`; you
+can read it, or set it to force one arrangement.
+
+## Using forms well
+
+- **End labels with a colon and write them in sentence case:** “Device name:”, not “Device Name”.
+- **Checkboxes and switches carry their own text.** Put the sentence on the control (“Use large text”) and use the
+  form label only for the group they belong to (“Text:”).
+- **Choose the control by the number of options:**
+
+| Options | Control |
+| --- | --- |
+| On or off, applied immediately | `QQC2.Switch` |
+| On or off, otherwise | `QQC2.CheckBox` |
+| Pick one of up to 3, short names | `QQC2.RadioButton` |
+| Pick one of up to about 10 | `QQC2.ComboBox` |
+| Pick one of more than 10 | A scrollable list |
+| A rough amount, quickly | `QQC2.Slider` |
+| An exact number | `QQC2.SpinBox` |
+
+- **Do not change a control's label or icon when it is switched on.** “Mute” that turns into “Unmute” leaves people
+  unsure whether the text describes the state or the action.
+- **Order options logically** (small to large, for example); if there is no natural order, alphabetically.
+- **Explain inline, briefly.** A short sentence under a control is better than a tooltip, which touch users cannot
+  see. For longer help add a `Kirigami.ContextualHelpButton` next to the control.
+- **Check input as it is typed.** If a value is invalid, show an [inline message](/components/inline-message/)
+  that says what is wrong, and disable the confirm button until it is fixed.
+
+<Callout title="Several forms on one page">
+  Two `FormLayout`s under each other each calculate their own label column, so their middles do not line up. List
+  each in the other's `twinFormLayouts` property and they share one column width.
+</Callout>
+
+## Properties you will use
+
+### Attached to each control: Kirigami.FormData
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `label` | string | The label shown beside (or above) the control. |
+| `isSection` | bool | Marks the item as a section break; with a `label`, a section heading. |
+| `buddyFor` | item | Which control gets focus when the label's keyboard accelerator is used. Needed when the labelled item is a row holding several controls. |
+| `labelAlignment` | alignment | Vertical position of the label next to a tall control, for example `Qt.AlignTop` beside a multi-line text area. |
+
+### On Kirigami.FormLayout
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `wideMode` | bool | `true` for two columns, `false` for labels above controls. Automatic by default. |
+| `twinFormLayouts` | list | Other form layouts that should share this one's column widths. |

@@ -1,0 +1,102 @@
+---
+title: Introduction
+summary: What this guide is, how its pages are laid out, and the two imports every example uses.
+section: start
+order: 1
+cover: components/page
+sources:
+  - label: KDE Human Interface Guidelines
+    url: https://develop.kde.org/hig/
+  - label: Getting started with Kirigami
+    url: https://develop.kde.org/docs/getting-started/kirigami/
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+KDE's design advice is spread over several places: the Human Interface Guidelines say what a good KDE app looks
+like, the Kirigami tutorial shows how to build one, and the API reference lists every property. This guide joins
+the three. Each page explains one topic in plain words, shows what it looks like, and gives you code you can copy.
+
+<Example
+  name="components/page"
+  alt="A notes app: a sidebar on the left with three destinations, a header with the page title and two actions, and a list of notes"
+  caption="Everything in this window is covered in this guide. The numbers point to the page that explains each part."
+  scale={0.9}
+  markers={[
+    { x: 11, y: 45, label: 'The sidebar is a <code>GlobalDrawer</code>, described in <a href="../../components/page/">Pages</a>.' },
+    { x: 41, y: 8.6, label: 'The title belongs to the <a href="../../components/page/">page</a>; its size comes from the <a href="../../foundations/typography/">type scale</a>.' },
+    { x: 76, y: 8.6, label: 'Buttons in the header are <a href="../../components/actions/">actions</a>.' },
+    { x: 65, y: 60, label: 'Colours and spacing in the content come from the <a href="../../foundations/colour/">theme</a> and the <a href="../../foundations/spacing/">units</a>.' },
+  ]}
+/>
+
+## The idea behind KDE design
+
+KDE states its design principle in one line: **simple by default, powerful when needed.** The common task should
+be obvious to someone opening the app for the first time, and the depth should be there, one deliberate step
+away, for those who go looking. Two pages cover the halves: [Simple by default](/patterns/first-launch/) and
+[Powerful when needed](/patterns/power/).
+
+For new apps KDE recommends Qt Quick with Kirigami, which is what this guide documents. Kirigami is
+*convergent*: one interface that reshapes itself for desktop, tablet and phone.
+
+## The sections
+
+
+- **Foundations**: colour, spacing, type and icons. The values everything else is built from.
+- **Patterns**: how to solve problems every app has, such as navigation, lists, settings and feedback. Start
+  here when you are deciding *what* to build.
+- **Components**: the building blocks, one per page. Go here when you know what you need and want to use it
+  correctly.
+- **Tutorial**: build a small to-do app step by step. The quickest way to see how the pieces fit together;
+  start with [What we will build](/tutorial/overview/).
+
+## How component pages are laid out
+
+Every component page follows the same order, so you can skim:
+
+1. **What it is.** A sentence or two and a picture.
+2. **When to use it**, and when to pick something else.
+3. **How to use it well.** Rules, shown as do and don't pairs where a picture helps.
+4. **In code.** A short example, then a table of the properties you will actually reach for.
+
+Screenshots are not drawings. They are produced by running the QML shown under each picture against Kirigami and
+the Breeze style, once with the light and once with the dark colour scheme. Switch the theme of this site with the
+button in the top right corner and the screenshots switch with it.
+
+## The two imports
+
+Almost every example starts with the same lines:
+
+```qml
+import QtQuick
+import QtQuick.Controls as QQC2
+import org.kde.kirigami as Kirigami
+```
+
+- **`QQC2`** is Qt Quick Controls: buttons, checkboxes, text fields, labels. KDE styles them to look like Breeze, so
+  you use them directly.
+- **`Kirigami`** adds what an app needs on top: pages and navigation, cards, forms, messages, and the theme values
+  for colour and spacing.
+
+When this guide writes `Kirigami.Card` or `QQC2.Button`, those prefixes are the ones from these imports.
+
+## Trying an example
+
+Examples whose QML starts with an ordinary item can be run as they are. Save the code as `example.qml` and run:
+
+```sh
+qml6 example.qml
+```
+
+To see how the same code behaves on a phone, set one environment variable first:
+
+```sh
+QT_QUICK_CONTROLS_MOBILE=1 qml6 example.qml
+```
+
+<Callout title="A note on words">
+  This guide says “colour scheme” for what users pick in System Settings, and “theme” for the `Kirigami.Theme` object
+  your code reads colours from. They are two views of the same thing.
+</Callout>

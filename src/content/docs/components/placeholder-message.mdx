@@ -1,0 +1,103 @@
+---
+title: Placeholder messages
+summary: What to show where content would be when there is none yet, so an empty page explains itself instead of looking broken.
+section: components
+order: 11
+cover: components/placeholder-message
+types: [Kirigami.PlaceholderMessage]
+sources:
+  - label: 'KDE HIG: Text and labels (Placeholders)'
+    url: https://develop.kde.org/hig/text_and_labels/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+
+A list with nothing in it is a blank rectangle. The user cannot tell whether the app is still loading, whether
+something failed, or whether there simply is nothing. `Kirigami.PlaceholderMessage` fills that space with an
+explanation, centred where the content would be.
+
+<Example
+  name="components/placeholder-message"
+  alt="A centred message: a large Bluetooth icon, the bold text No devices found, a line of explanation below it, and a Search Again button"
+  caption="All four optional parts in use: icon, text, explanation and a helpful action."
+  markers={[
+    { x: 59, y: 26, label: '<strong>Icon.</strong> Optional. A large symbolic icon that hints at the subject.' },
+    { x: 70, y: 50, label: '<strong>Text.</strong> The one line that says what the situation is.' },
+    { x: 88.5, y: 60, label: '<strong>Explanation.</strong> Optional. Why, or what to do.' },
+    { x: 66, y: 80.5, label: '<strong>Helpful action.</strong> Optional. One button that gets the user out of the empty state.' },
+  ]}
+/>
+
+## When to use it
+
+- A list, grid or page has **no items yet**: “No notes yet”.
+- A **search or filter matches nothing**: “No results for ‘kirigmai’”.
+- Content **cannot be shown** right now: offline, no device connected, no permission.
+- A view is **waiting for the user to pick something**: “Select a note to read it”.
+
+For loading, use `Kirigami.LoadingPlaceholder` instead, which shows a progress indicator in the same position.
+
+## How much to say
+
+Often one line is enough.
+
+<Example
+  name="components/placeholder-message-simple"
+  alt="A single centred line of large, bold, slightly faded text: No notes yet"
+  caption="Only <code>text</code> is set. Fine when the reason and the remedy are both obvious."
+/>
+
+Add the other parts only when they help:
+
+- an **explanation** when the reason is not obvious or the user can do something about it;
+- a **helpful action** when one button solves the problem (“Add Note”, “Search Again”, “Open Network Settings”);
+- an **icon** when the page has no other visual hint of what belongs there.
+
+<DoDont>
+  <Do sample="No devices found">State the situation briefly, in sentence case, without a full stop.</Do>
+  <Dont sample="Oops! We couldn’t find anything…">
+    Be chatty or vague. It says neither what was looked for nor why nothing came up.
+  </Dont>
+</DoDont>
+
+## In code
+
+Centre the message in the view it stands in for, limit its width so long text wraps, and show it only while the
+view is empty:
+
+```qml
+ListView {
+    id: notesView
+    model: notesModel
+
+    Kirigami.PlaceholderMessage {
+        anchors.centerIn: parent
+        width: parent.width - Kirigami.Units.gridUnit * 4
+        visible: notesView.count === 0
+
+        icon.name: "view-list-text"
+        text: "No notes yet"
+
+        helpfulAction: Kirigami.Action {
+            icon.name: "list-add"
+            text: "Add Note"
+            onTriggered: notesModel.addNote()
+        }
+    }
+}
+```
+
+The message is placed *inside* the list view, so it sits exactly where the items would be.
+
+## Properties you will use
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The main line. |
+| `explanation` | string | Smaller text under the main line. |
+| `icon.name` | string | Icon shown above the text. |
+| `helpfulAction` | action | Shown as a button under the text. See [Actions and toolbars](/components/actions/). |
+| `type` | enum | `Kirigami.PlaceholderMessage.Type.Actionable` makes the text more prominent, for when the user is expected to act; `Informational` makes it quieter. Chosen automatically: actionable when there is an enabled helpful action. |

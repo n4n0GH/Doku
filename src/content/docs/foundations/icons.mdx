@@ -1,0 +1,107 @@
+---
+title: Icons
+summary: Ask for icons by name and the system supplies them in the user's icon theme, at the right size and in the right colours.
+section: foundations
+order: 4
+cover: foundations/icon-sizes
+types: [Kirigami.Icon, Kirigami.Units.iconSizes]
+sources:
+  - label: 'KDE HIG: Icons'
+    url: https://develop.kde.org/hig/icons/
+  - label: 'KDE HIG: Layout and navigation (Spacings and sizes)'
+    url: https://develop.kde.org/hig/layout_and_nav/
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+KDE apps do not ship their own toolbar icons. They ask for an icon **by name**, such as `document-save`, and the
+desktop provides it from the user's icon theme. Names follow the FreeDesktop icon naming specification, and Breeze
+is the reference theme.
+
+```qml
+QQC2.Button {
+    text: "Save"
+    icon.name: "document-save"
+}
+
+// On its own, outside a control:
+Kirigami.Icon {
+    source: "folder"
+    implicitWidth: Kirigami.Units.iconSizes.medium
+    implicitHeight: Kirigami.Units.iconSizes.medium
+}
+```
+
+<Callout title="Finding icon names">
+  Install **Icon Explorer** (the command is `iconexplorer`) to browse and search every icon in the installed
+  themes and copy its name.
+</Callout>
+
+## Sizes
+
+Icons come in fixed sizes. Pick the named step; do not scale icons to arbitrary sizes, because each size is drawn
+separately to stay sharp.
+
+<Example
+  name="foundations/icon-sizes"
+  alt="The folder icon at five sizes from 16 to 64 pixels. The two smallest are simple outlines, the larger three are coloured blue folders."
+  caption="One icon name, five sizes. Notice that the drawing itself changes, not only its size."
+/>
+
+| Size | Where it belongs |
+| --- | --- |
+| `iconSizes.small` | Menu items and ordinary (raised) buttons. |
+| `iconSizes.smallMedium` | Toolbar buttons and other flat buttons; list items with one line of text. |
+| `iconSizes.medium` | List items with a title and a subtitle. |
+| `iconSizes.large`, `huge`, `enormous` | Large illustrations, such as an empty-state message or an app icon on an About page. |
+
+Buttons, menu items and standard list delegates already choose the right size. You only set a size on a bare
+`Kirigami.Icon`.
+
+## Two styles: symbolic and full colour
+
+<Example
+  name="foundations/icon-styles"
+  alt="On the left four small single-colour line icons; on the right four large, detailed, colourful icons"
+  caption="Symbolic icons are simple line drawings in the text colour. Full-colour icons are detailed pictures."
+/>
+
+| Size | Style |
+| --- | --- |
+| `small` (16 px) | Always symbolic. |
+| `smallMedium` (22 px) | Almost always symbolic. Full colour is acceptable in a list with very few items. |
+| `medium` (32 px) and larger | Full colour. |
+
+The theme normally picks the right style for the size you ask for. To insist on the symbolic version, add
+`-symbolic` to the name: `folder-symbolic`.
+
+Symbolic icons take their colour from the theme's text colour, so they stay visible in dark schemes without any
+work from you. This is one more reason not to bundle your own image files.
+
+## Using icons well
+
+- **Give most buttons text as well.** An icon alone is acceptable only when space is very tight, when the icon is
+  instantly recognisable (search, close, back), or when neighbouring icons explain each other.
+- **Icon-only buttons still need a name.** Set `text` anyway, hide it with `display: QQC2.AbstractButton.IconOnly`,
+  and add a tooltip. Screen readers read the text.
+- **Do not repeat an icon.** Two visible buttons or menu items with the same icon force people to read the labels
+  after all. If two actions would share a generic icon, pick a more specific one for each.
+- **In lists, vary the icons or leave them out.** A column of identical icons carries no information.
+- **Keep trailing buttons on list rows to a minimum.** Icons only, at most two, ideally none or one.
+- **Overlay badges** on icons must use icons whose names start with `emblem-`.
+
+### Destructive actions
+
+| Action | Icon name | Looks like |
+| --- | --- | --- |
+| Delete the user's content permanently | `edit-delete` | Red rubbish bin |
+| Remove an item that could be added back | `edit-delete-remove` | Red × |
+| Move to the trash | `trash-empty` | Plain rubbish bin, not red |
+
+Red is reserved for actions that destroy something. Do not use a red icon for anything else.
+
+### Icons that point somewhere
+
+In languages written right to left, such as Arabic and Hebrew, the whole interface is mirrored. Directional icons
+like “back” have `-rtl` variants for this. Photographs and other images are not mirrored.

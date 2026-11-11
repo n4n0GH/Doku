@@ -1,0 +1,97 @@
+---
+title: Powerful when needed
+summary: The second of KDE’s two design principles. Depth for people who want it, placed where it does not get in the way of people who do not.
+section: patterns
+order: 6
+cover: components/action-display-hints
+sources:
+  - label: 'KDE HIG: Powerful when needed'
+    url: https://develop.kde.org/hig/powerful_when_needed/
+  - label: 'KDE HIG: What makes a KDE app a KDE app?'
+    url: https://develop.kde.org/hig/kde_app_design/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+KDE apps are known for how much they let people do and change. That reputation is worth keeping, and it is also
+easy to turn into clutter. The idea is to offer power without charging everyone for it: the simple path stays
+simple (see [Simple by default](/patterns/first-launch/)), and the depth is one deliberate step away.
+
+## Settings
+
+A setting exists so that people who work differently can each work their way.
+
+<DoDont>
+  <Do sample="Clicking files:  ◉ Opens them  ○ Selects them">
+    Offer a choice between behaviours that are each right for someone.
+  </Do>
+  <Dont sample="☐ Enable thumbnails">
+    Add a switch that merely turns a feature off. It is usually a sign that the feature is not finished.
+  </Dont>
+</DoDont>
+
+Do not add a setting:
+
+- **to avoid making a decision.** Choosing a good default is the designer's job.
+- **to work around a bug.** Fix the bug.
+- **to override the system.** Colours, fonts, animation speed and the like belong to the desktop's settings;
+  follow them.
+- **because “KDE is about options”.** Every setting is something to read, understand and test. Too many make an
+  app harder for everyone.
+
+Appearance options are the least valuable kind. Do not weaken the default look to make room for them.
+
+Build settings pages with a [form layout](/components/form-layout/), and apply changes immediately, without
+asking for a restart.
+
+## Do not call it “Advanced”
+
+A page or section named “Advanced” says nothing about what is in it. Beginners are scared off, experts have to
+open it to find out.
+
+Use **progressive disclosure** instead: show the simple version first, and let people open the detailed one from
+it. System Settings does this for colours: the page shows a grid of colour schemes to pick from, and each scheme
+has an Edit button that opens the full editor in its own window.
+
+| Instead of… | Do this |
+| --- | --- |
+| An “Advanced” tab | Name the tab after what it contains |
+| A long page with rare options at the bottom | Move them to a sub-page reached from a clearly named row |
+| A dialog full of expert fields | A simple dialog with a “Details” section that expands |
+
+## Accelerators
+
+Keyboard shortcuts, context menus and gestures let practised users go faster. They are extra routes, never the
+only one.
+
+<Example
+  name="components/action-display-hints"
+  alt="A toolbar with Add Note, a search icon, a Sort menu button and an overflow button"
+  caption="Every action here is visible or one click away. Shortcuts for them are a bonus on top."
+  code={false}
+/>
+
+- **Give every action a shortcut**, or at least let users assign one. Use the standard shortcut for standard
+  actions.
+- **Do not use the Meta key**; it is reserved for the desktop.
+- **Use only two-finger gestures.** Three- and four-finger gestures belong to the system.
+- **Anything in a context menu must also be reachable another way.**
+
+See [Actions and toolbars](/components/actions/) for how shortcuts are attached to actions.
+
+## Extensions
+
+If your app can be extended with plugins, themes or other downloadable content, use KDE's KNewStuff framework to
+fetch it. If you build your own downloader instead, warn people clearly that third-party content comes with no
+promise of quality or safety.
+
+## Who you are designing for
+
+KDE's guidelines are frank about the audience: people with at least basic computer knowledge, up to experts and
+professionals. They are assumed to know what windows, buttons, menus, lists and tabs are. You are allowed to
+choose your users, and you do not have to design for someone who has never used a computer. What you may not do
+is make the common task hard for the sake of the rare one.

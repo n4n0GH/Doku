@@ -1,0 +1,33 @@
+---
+// The light and dark renders of one example; CSS shows the one that matches
+// the site theme.
+import { loadExample } from '../lib/examples';
+import { url } from '../lib/site';
+
+interface Props {
+  name: string;
+  alt: string;
+  /** Scale down, e.g. 0.75, for large window screenshots. */
+  scale?: number;
+  eager?: boolean;
+  /** Always show this variant instead of following the site theme. */
+  theme?: 'light' | 'dark';
+}
+
+const { name, alt, scale = 1, eager = false, theme } = Astro.props;
+const example = loadExample(name);
+const width = Math.round(example.width * scale);
+const height = Math.round(example.height * scale);
+const loading = eager ? 'eager' : 'lazy';
+---
+
+{
+  theme ? (
+    <img src={url(example[theme])} alt={alt} width={width} height={height} loading={loading} />
+  ) : (
+    <>
+      <img class="only-light" src={url(example.light)} alt={alt} width={width} height={height} loading={loading} />
+      <img class="only-dark" src={url(example.dark)} alt={alt} width={width} height={height} loading={loading} />
+    </>
+  )
+}

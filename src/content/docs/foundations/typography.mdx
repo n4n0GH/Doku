@@ -1,0 +1,110 @@
+---
+title: Typography and wording
+summary: Two text components cover nearly everything, and a few wording rules make an app read like the rest of KDE.
+section: foundations
+order: 3
+cover: foundations/typography-scale
+types: [Kirigami.Heading, QQC2.Label]
+sources:
+  - label: 'KDE HIG: Text and labels'
+    url: https://develop.kde.org/hig/text_and_labels/
+  - label: 'Kirigami tutorial: Typography'
+    url: https://develop.kde.org/docs/getting-started/kirigami/style-typography/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+## The type scale
+
+<Example
+  name="foundations/typography-scale"
+  alt="Seven lines of text in decreasing size: heading levels 1 to 4, a normal label, a small label and a fixed-width label"
+  caption="Everything here is sized relative to the font the user chose in System Settings."
+/>
+
+There are only two components to remember:
+
+- **`QQC2.Label`** for all normal text.
+- **`Kirigami.Heading`** for titles. Its `level` sets the size: 1 is the largest.
+
+| Component | Size, relative to normal text | Use it for |
+| --- | --- | --- |
+| `Kirigami.Heading { level: 1 }` | 135% | The main title of a page or a large empty-state message. This is the default level. |
+| `Kirigami.Heading { level: 2 }` | 120% | Titles of major sections. |
+| `Kirigami.Heading { level: 3 }` | 115% | Sub-sections. |
+| `Kirigami.Heading { level: 4 }` | 110% | Titles of small groups, such as a group of checkboxes. |
+| `QQC2.Label` | 100% | Everything else. |
+| `QQC2.Label { font: Kirigami.Theme.smallFont }` | The user's “small” font | Captions and secondary details. Never for anything people must read. |
+| `QQC2.Label { font: Kirigami.Theme.fixedWidthFont }` | The user's fixed-width font | Code, file paths, terminal output. |
+
+<Callout title="Do not use Text" kind="warning">
+  Plain `Text` from Qt Quick ignores the user's font settings and the theme's text colour. `QQC2.Label` looks the
+  same in your code and respects both.
+</Callout>
+
+Avoid setting `font.pointSize` or `font.pixelSize` yourself. If a heading level does not give the emphasis you want,
+`Kirigami.Heading` has a `type` property: `Kirigami.Heading.Type.Primary` makes it more prominent and
+`Kirigami.Heading.Type.Secondary` less so, without leaving the scale.
+
+### Titles with subtitles
+
+<Example
+  name="foundations/typography-title-subtitle"
+  alt="A heading reading Apples in the sunlight with a slightly faded line under it reading And pears in the moonlight"
+  caption="A title and its subtitle have no space between them. The subtitle is a normal label at reduced opacity."
+/>
+
+## Capital letters
+
+KDE uses two styles, and which one applies depends on what the text is.
+
+| Style | Looks like | Use it for |
+| --- | --- | --- |
+| **Title Case** | Configure Keyboard Shortcuts | Buttons, menu items, tab names, window and page titles, headings. |
+| **Sentence case** | Use large text | Anything that ends in a full stop or a colon; labels of checkboxes and radio buttons; items in a combo box; labels in front of a control; subtitles; tooltips; placeholder text; status messages. |
+
+If unsure: text that names a thing or an action gets title case; text that reads like a sentence or describes a
+setting gets sentence case.
+
+## Wording
+
+<DoDont>
+  <Do sample="Show Info">Start buttons and menu items with a verb that says what will happen.</Do>
+  <Dont sample="Info">Use a bare noun. It does not say whether pressing it shows, edits or sends the info.</Dont>
+</DoDont>
+
+<DoDont>
+  <Do sample="Missing authorization to access the file.">Describe the situation.</Do>
+  <Dont sample="You are not authorized to access the file.">Address the user as “you”. It reads as blame.</Dont>
+</DoDont>
+
+<DoDont>
+  <Do sample="Allow the system to go to sleep">Phrase settings positively, so that “on” means it happens.</Do>
+  <Dont sample="Don’t prevent the system from sleeping">Use negatives. A ticked box that means “no” is a puzzle.</Dont>
+</DoDont>
+
+- **Keep controls short.** Anything longer than “Configure Keyboard Shortcuts” is too long for a button or menu item.
+- **Keep paragraphs narrow.** Text of more than one sentence should wrap at about 85 characters (around 450 px).
+- **Leave room for translation.** Other languages can need half as much space again, or more. Let labels wrap or
+  grow instead of fixing their width.
+- **Spell things out.** Write “Operating system”, “Memory” and “Link” instead of OS, RAM and URL. Write units as
+  whole words (“200 milliseconds”) unless space is very tight.
+- **Use `…` only when more input is needed.** “Save As…” opens a dialog that asks for a name, so it gets an
+  ellipsis; “Save” does not. Use the real ellipsis character `…`, not three full stops.
+- **Use real symbols.** `×` for dimensions (1920 × 1080), `–` for ranges, `→` instead of `->`.
+- **Use the serial comma** in lists of three or more: “files, folders, and links”.
+
+### Titles of windows and dialogs
+
+Keep window titles short and distinctive, without the company name or version number. A dialog's title starts with
+a verb and repeats the action that opened it: the button “Save…” opens a dialog titled “Save File”.
+
+### Placeholder text in fields
+
+If a text field has a label in front of it, the placeholder can show an example value. If it has no label, use a
+short instruction such as “Search” or “Enter file name”. Placeholders use sentence case and do not end with an
+ellipsis.

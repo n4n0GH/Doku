@@ -1,0 +1,99 @@
+---
+title: Spacing and units
+summary: Kirigami has a handful of named distances. Use them instead of pixel numbers and your layout stays consistent with every other KDE app.
+section: foundations
+order: 2
+cover: foundations/spacing-grouping
+types: [Kirigami.Units]
+sources:
+  - label: 'KDE HIG: Layout and navigation (Spacings and sizes)'
+    url: https://develop.kde.org/hig/layout_and_nav/
+---
+
+import Example from '../../../components/Example.astro';
+import UnitScale from '../../../components/UnitScale.astro';
+import Callout from '../../../components/Callout.astro';
+
+Spacing is what tells people which things belong together. Kirigami provides named distances in `Kirigami.Units`,
+and the KDE guidelines say which one to use where. The values follow the user's font and scaling settings, which
+is why you should use the names and not the numbers.
+
+## The spacing units
+
+<UnitScale
+  units={[
+    { name: 'smallSpacing', note: 'between things that belong together' },
+    { name: 'mediumSpacing', note: 'between items in a toolbar' },
+    { name: 'largeSpacing', note: 'between groups, and around page content' },
+    { name: 'gridUnit', note: 'for sizes: widths, heights, window sizes' },
+    { name: 'cornerRadius', note: 'for rounded corners' },
+  ]}
+/>
+
+The bars are enlarged six times. Pixel values are those of a stock Plasma desktop with the default font.
+
+## Which unit goes where
+
+| Between… | Use |
+| --- | --- |
+| A title and its subtitle | `0` |
+| A title (with subtitle) and the content under it | `Kirigami.Units.smallSpacing` |
+| Controls in the same logical group | `Kirigami.Units.smallSpacing` |
+| Buttons and fields in a toolbar | `Kirigami.Units.mediumSpacing` |
+| One group of controls and the next | `Kirigami.Units.largeSpacing` |
+| The page edge and its content | `Kirigami.Units.largeSpacing` |
+| The page edge and a frameless list or grid that fills the page | `0` |
+
+The rule behind the table is simple: **less space inside a group, more space between groups.**
+
+<Example
+  name="foundations/spacing-grouping"
+  alt="Two groups of checkboxes, each under a small heading. The checkboxes in a group sit close together and the gap between the two groups is clearly wider."
+  caption="Within each group items are <code>smallSpacing</code> apart; the groups are <code>largeSpacing</code> apart. No lines or boxes are needed to see two groups."
+/>
+
+## Sizes: gridUnit
+
+For the size of things, use multiples of `Kirigami.Units.gridUnit`. One grid unit is about the height of a line of
+text, so sizes expressed in it grow when the user picks a larger font.
+
+```qml
+Kirigami.Card {
+    // About 20 lines of text wide, whatever the font size is.
+    Layout.maximumWidth: Kirigami.Units.gridUnit * 20
+}
+```
+
+Use it for fixed widths and heights, and for default and minimum window sizes. Do not use it for gaps between
+things; that is what the spacing units are for.
+
+<Callout title="Avoid bare numbers" kind="warning">
+  `spacing: 8` looks the same as `spacing: Kirigami.Units.largeSpacing` on your machine today. It stops matching as
+  soon as someone uses a different font size, a different scale factor, or a future Kirigami that tunes the values.
+  The only bare number you should need is `0`.
+</Callout>
+
+## Icon sizes
+
+Icons also come in fixed steps, under `Kirigami.Units.iconSizes`. They are covered on the
+[Icons](/foundations/icons/) page.
+
+## Durations
+
+Animations use named durations too, so the whole desktop moves at one pace and respects the user's animation
+speed setting. All values are in milliseconds.
+
+| Unit | Stock value | Typical use |
+| --- | --- | --- |
+| `Kirigami.Units.veryShortDuration` | 50 | Tiny, instant-feeling changes. |
+| `Kirigami.Units.shortDuration` | 100 | Hover and press feedback. |
+| `Kirigami.Units.longDuration` | 200 | Things that move or appear: sheets, drawers, expanding sections. |
+| `Kirigami.Units.veryLongDuration` | 400 | Large movements across the window. |
+| `Kirigami.Units.toolTipDelay` | 700 | How long the pointer rests before a tooltip shows. |
+| `Kirigami.Units.humanMoment` | 2000 | How long before a person notices they are waiting. |
+
+```qml
+Behavior on opacity {
+    NumberAnimation { duration: Kirigami.Units.longDuration }
+}
+```

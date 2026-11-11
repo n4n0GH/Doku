@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import Shot from '../components/Shot.astro';
+import { SECTIONS, SITE, docPath, orderedDocs, url } from '../lib/site';
+
+const docs = await orderedDocs();
+const first = docs[0];
+---
+
+<Base>
+  <main class="home">
+    <section class="hero">
+      <div>
+        <h1>Design KDE apps that feel at home.</h1>
+        <p>
+          The KDE and Kirigami design guidance in one place, in plain language, with a real screenshot next to every
+          rule and component.
+        </p>
+        <a class="button" href={url(docPath(first))}>Start reading</a>
+        <a class="button quiet" href="#components">Browse components</a>
+      </div>
+      <div class="hero-shot">
+        <Shot name="components/page" alt="A Kirigami notes app with a sidebar, a page header with actions and a list of notes" eager />
+      </div>
+    </section>
+
+    {
+      SECTIONS.map((section) => (
+        <section id={section.id}>
+          <h2>{section.title}</h2>
+          <p class="blurb">{section.blurb}</p>
+          <div class="cards">
+            {docs
+              .filter((d) => d.data.section === section.id)
+              .map((d) => (
+                <a class="card" href={url(docPath(d))}>
+                  {d.data.cover && (
+                    <div class="card-thumb">
+                      <Shot name={d.data.cover} alt="" />
+                    </div>
+                  )}
+                  <div class="card-text">
+                    <strong>{d.data.title}</strong>
+                    <span>{d.data.summary}</span>
+                  </div>
+                </a>
+              ))}
+          </div>
+        </section>
+      ))
+    }
+  </main>
+</Base>

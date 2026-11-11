@@ -1,0 +1,121 @@
+---
+title: Text fields
+summary: Kirigami adds three specialised text fields to the standard one, for searching, for passwords, and for fields with a built-in button.
+section: components
+order: 6
+cover: components/text-fields
+types: [Kirigami.SearchField, Kirigami.PasswordField, Kirigami.ActionTextField, QQC2.TextField]
+sources:
+  - label: 'KDE HIG: Getting input'
+    url: https://develop.kde.org/hig/getting_input/
+  - label: 'KDE HIG: Text and labels (Placeholders)'
+    url: https://develop.kde.org/hig/text_and_labels/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="components/text-fields"
+  alt="Three text fields stacked: a search field with a magnifying glass and the word Search, a field holding an email address with a copy button at its end, and a password field showing dots with an eye button at its end"
+  caption="From top to bottom: <code>SearchField</code>, <code>ActionTextField</code> and <code>PasswordField</code>."
+/>
+
+## Which field
+
+| For… | Use |
+| --- | --- |
+| Ordinary text | `QQC2.TextField`; `QQC2.TextArea` for several lines |
+| Searching or filtering | `Kirigami.SearchField` |
+| A password | `Kirigami.PasswordField` |
+| Text plus a small button that acts on it | `Kirigami.ActionTextField` |
+
+## Search field
+
+Always use `Kirigami.SearchField` for search. It brings what people expect from search everywhere in KDE: the
+magnifying-glass icon, a translated “Search…” placeholder, a clear button once there is text, and the standard
+Find shortcut (Ctrl+F) to jump into it.
+
+```qml
+Kirigami.SearchField {
+    onAccepted: notesModel.filter = text
+}
+```
+
+You do not need to listen to every key press. By default the field fires `accepted` by itself shortly after
+the user stops typing, so results update live without running a search for each letter.
+
+- If searching is slow or expensive, set `delaySearch: true` to wait longer before firing.
+- If search should run only when Enter is pressed, set `autoAccept: false`.
+
+A common place for a search field is the top of a list or the header of a sidebar.
+
+## Password field
+
+`Kirigami.PasswordField` hides what is typed and offers a button to reveal it, which helps people catch
+typing mistakes before submitting. Do not build this from a plain text field.
+
+## Field with actions
+
+`Kirigami.ActionTextField` is a text field that can hold small icon buttons inside its frame, at either end.
+The search and password fields are built on it.
+
+```qml
+Kirigami.ActionTextField {
+    id: addressField
+    text: "konqi@example.org"
+
+    rightActions: Kirigami.Action {
+        icon.name: "edit-copy"
+        text: "Copy"
+        onTriggered: {
+            addressField.selectAll()
+            addressField.copy()
+        }
+    }
+}
+```
+
+Use it for one or two actions that belong to the field's content: copy, clear, paste, pick from a list. Give each
+action a `text` as well as an icon; it becomes the tooltip and the name read by screen readers.
+
+## Using text fields well
+
+- **Label fields** with a label in front, using a [form layout](/components/form-layout/). A placeholder is not
+  a label: it vanishes as soon as typing starts.
+- **Placeholder text** depends on whether there is a label. With a label, show an example value
+  (“konqi@example.org”). Without one, use a short instruction (“Enter file name”). Sentence case, no trailing
+  ellipsis.
+- **Validate while typing**, not after submitting. Explain a problem in an
+  [inline message](/components/inline-message/) and keep the confirm button disabled until the input is valid.
+- **Size the field for its content.** A postcode field should not be as wide as an address field.
+
+## Properties you will use
+
+### Kirigami.SearchField
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | What has been typed. |
+| `onAccepted` | handler | Runs when a search should happen. |
+| `autoAccept` | bool | Fire `accepted` automatically after typing pauses. Default `true`. |
+| `delaySearch` | bool | Wait longer before firing, for expensive searches. Default `false`. |
+
+### Kirigami.PasswordField
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The password. |
+| `showPassword` | bool | Whether the text is currently readable. Default `false`. |
+
+### Kirigami.ActionTextField
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `leftActions` | list of actions | Buttons at the leading end, inside the field. |
+| `rightActions` | list of actions | Buttons at the trailing end, inside the field. |
+| `focusSequence` | key sequence | A shortcut that moves keyboard focus into the field. |
+| `placeholderText` | string | Hint shown while the field is empty. |

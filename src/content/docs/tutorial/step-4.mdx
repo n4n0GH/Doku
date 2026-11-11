@@ -1,0 +1,125 @@
+---
+title: '4. Ticking off and deleting'
+summary: Make the checkbox change the data, show finished tasks as finished, and add a delete button that can be undone.
+section: tutorial
+order: 4
+cover: tutorial/step4
+types: [QQC2.ItemDelegate, showPassiveNotification]
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="tutorial/step4"
+  alt="The task list. The ticked task is struck through and faded. Every row has a red bin button at its end."
+  caption="Finished tasks step back; every row can be deleted."
+  codeLabel="Show the complete main.qml for this step"
+/>
+
+The ready-made check delegate cannot hold a delete button, so this step builds the row from parts. It needs one
+more import at the top of the file, for `RowLayout`:
+
+```qml
+import QtQuick.Layouts
+```
+
+## A custom row
+
+Replace the delegate with this:
+
+```qml
+delegate: QQC2.ItemDelegate {
+    id: row
+
+    required property string title
+    required property bool done
+    required property int index
+
+    width: ListView.view.width
+
+    onClicked: tasksModel.setProperty(index, "done", !done)
+
+    contentItem: RowLayout {
+        spacing: Kirigami.Units.smallSpacing
+
+        QQC2.CheckBox {
+            checked: row.done
+            onToggled: tasksModel.setProperty(row.index, "done", checked)
+        }
+
+        QQC2.Label {
+            Layout.fillWidth: true
+            text: row.title
+            elide: Text.ElideRight
+
+            font.strikeout: row.done
+            opacity: row.done ? 0.6 : 1
+        }
+
+        QQC2.ToolButton {
+            text: "Delete"
+            icon.name: "edit-delete"
+            display: QQC2.AbstractButton.IconOnly
+            onClicked: root.deleteTask(row.index)
+
+            QQC2.ToolTip.text: text
+            QQC2.ToolTip.visible: hovered
+            QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
+        }
+    }
+}
+```
+
+We keep a standard `QQC2.ItemDelegate` and replace only its inside, the `contentItem`. That way the row
+keeps the standard height, padding, hover effect and keyboard behaviour.
+
+- **`required property int index`** is the row's position in the list. The view provides it, like the data
+  fields.
+- **`tasksModel.setProperty(index, "done", …)`** is what was missing in step 2: it writes the new state into
+  the *model*. The checkbox then shows it because `checked: row.done` reads from the model. Data flows one way:
+  the user changes the model, the model changes the screen.
+- **`onClicked` on the whole row** does the same, so the entire row is a click target, not just the small box.
+- **The label** takes all spare width (`Layout.fillWidth`) and shortens long titles with “…” instead of
+  pushing the button out of the window.
+- **Strike-through and reduced opacity** show that a task is finished in two ways at once, so it does not
+  depend on seeing either one.
+- **The delete button** shows only an icon, but has a `text` and a tooltip that name it.
+
+## Deleting, with undo
+
+Add this function to the window, next to `addTask`:
+
+```qml
+function deleteTask(row: int): void {
+    const task = { title: tasksModel.get(row).title, done: tasksModel.get(row).done }
+    tasksModel.remove(row)
+    showPassiveNotification("“" + task.title + "” deleted", "long", "Undo",
+        () => tasksModel.insert(row, task))
+}
+```
+
+It remembers the task, removes it, and shows a small message at the bottom of the window with an Undo button.
+Undo puts the remembered task back where it was. After a few seconds the message goes away by itself.
+
+<Example
+  name="patterns/undo"
+  alt="A list with a small floating bar at the bottom that reads Meeting notes moved to the trash and has an Undo button"
+  caption="What a passive notification with an action looks like (from another example)."
+  code={false}
+  scale={0.9}
+/>
+
+## Why these choices
+
+- **No “Are you sure?” dialog.** Deleting one task is a small thing that is easy to do by accident. Doing it at
+  once and offering a way back is faster for everyone and safer than a question people learn to click through.
+  See [Feedback and status](/patterns/feedback/).
+- **The red bin icon** `edit-delete` is the standard one for removing the user's own content. See
+  [Icons](/foundations/icons/).
+- **The button is always visible**, not only on hover, so it also exists on touch screens. See
+  [Showing collections](/patterns/collections/).
+
+## Try it
+
+Tick a task, then click its text to untick it. Delete one and press Undo.

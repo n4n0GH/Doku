@@ -1,0 +1,89 @@
+---
+title: Showing collections
+summary: Lists, grids, tables and tabs all show many things at once. Which one fits depends on what the things are.
+section: patterns
+order: 2
+cover: components/list-subtitles
+sources:
+  - label: 'KDE HIG: Displaying content'
+    url: https://develop.kde.org/hig/displaying_content/
+  - label: 'KDE HIG: Icons'
+    url: https://develop.kde.org/hig/icons/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+## List, grid or table?
+
+| The items are… | Use | Built with |
+| --- | --- | --- |
+| Mostly text: names, messages, settings | A **list** | `ListView` and [list items](/components/lists/) |
+| Mostly visual: photos, covers, apps | A **grid**, or [cards](/components/cards/) | `GridView`, `Kirigami.CardsLayout` |
+| Records with three or more fields worth comparing | A **table** | `TableView` |
+
+If you are tempted to make a table with two columns, make a list with a title and a subtitle instead.
+
+<Example
+  name="components/list-subtitles"
+  alt="A list of four network connections, each with an icon, a name and a smaller status line; the first is highlighted"
+  caption="Two fields per item fit a list comfortably: one as the title, one as the subtitle."
+/>
+
+### Avoid trees
+
+Tree views, with rows that expand into indented child rows, are hard to use with touch and easy to get lost in.
+Prefer a list with section headers, a list that pushes a new page, or collapsible sections.
+
+## Making lists easy to scan
+
+- **Make the selected or active item stand out.** The highlight colour marks the current row; bold text marks
+  the item that is in use, such as the connected network or the playing track.
+- **Vary the icons, or leave them out.** A column of identical icons tells nobody anything.
+- **Striped rows** help the eye in wide lists and tables. Turn them on with
+  `Kirigami.Theme.useAlternateBackgroundColor: true` on the view; do not paint them yourself.
+- **Group long lists** under section headers.
+
+## Adding and removing items
+
+<Example
+  name="components/list-view-header"
+  alt="A list of three accounts under a header bar reading Accounts, with an Add Account button at its right end"
+  caption="The button that adds to this list lives in the list’s own header."
+/>
+
+- **Controls that add to a list belong to the list.** Put them in a `Kirigami.InlineViewHeader` at the top of
+  the view, not far away in the window's toolbar.
+- **Controls that act on one row go on that row**, at its trailing end, as icon-only buttons. Keep them always
+  visible; a button that appears only on hover does not exist for touch users. Use at most two per row, and
+  preferably none or one.
+- **Removing should be easy to undo.** See [Feedback and status](/patterns/feedback/).
+
+## Tabs
+
+There are two kinds of tabs and they should not be confused.
+
+| Kind | What the tabs are | Component | Placement |
+| --- | --- | --- | --- |
+| **Navigation tabs** | The fixed places of your app | `Kirigami.NavigationTabBar` | Above content on desktop, below on phones |
+| **Document tabs** | Things the user opened: web pages, files, chats | `QQC2.TabBar` | Above the content, full width |
+
+Document tabs can be closed and reordered by the user, so each needs a close button. Hide the tab bar when only
+one tab is open.
+
+Tabs do not scale. As a way to split one view into sections they stop working beyond four or five tabs on a
+desktop, and two on a phone. If you have more, use a list that leads to pages.
+
+## Showing extra detail
+
+| The detail is… | Show it… |
+| --- | --- |
+| Large enough to fill the window | On a new [page](/components/page/) |
+| Read-only and possibly long | In an [overlay sheet](/components/overlay-sheet/) |
+| A question or a small form | In a [dialog](/components/dialogs/) |
+
+Anything that floats over the content needs a visible edge, so it does not melt into the background in dark
+colour schemes. Kirigami's own sheets, dialogs and cards have one.

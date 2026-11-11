@@ -1,0 +1,93 @@
+---
+title: Navigation tab bar
+summary: A row of labelled icons for switching between the few main places of an app. On a phone it sits at the bottom, within reach of a thumb.
+section: components
+order: 8
+cover: components/navigation-tab-bar
+types: [Kirigami.NavigationTabBar]
+sources:
+  - label: 'KDE HIG: Layout and navigation'
+    url: https://develop.kde.org/hig/layout_and_nav/
+  - label: 'KDE HIG: Displaying content (Tabs)'
+    url: https://develop.kde.org/hig/displaying_content/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="components/navigation-tab-bar"
+  alt="A clock app with four tabs across the top: Clock, Alarms, Stopwatch and Timers. Clock is selected, and the time 10:42 is shown in the content area."
+  caption="Four top-level places. The current one is highlighted."
+  scale={0.9}
+/>
+
+## When to use it
+
+Use a navigation tab bar when your app has **two to five top-level places** of equal standing, and people switch
+between them often.
+
+| Situation | Use instead |
+| --- | --- |
+| More than five places | A sidebar: see [Drawers](/components/drawers/) |
+| Places that are steps of one flow | The page stack: see [Pages](/components/page/) |
+| Tabs the user opens and closes, like browser tabs | `QQC2.TabBar`: see [Showing collections](/patterns/collections/) |
+| Actions (“New”, “Share”) | A toolbar: see [Actions and toolbars](/components/actions/) |
+
+A tab bar is for *going somewhere*. Every tab should show a different view; none should do something.
+
+## Where it goes
+
+| Device | Position | Set it as the window's |
+| --- | --- | --- |
+| Desktop | Above the content | `header` |
+| Phone | Below the content | `footer` |
+
+<Example
+  name="patterns/navigation-phone"
+  alt="A phone-sized window with a tab bar at the bottom showing Notes, Favourites and Trash"
+  caption="On a phone the bar goes at the bottom edge."
+  code={false}
+/>
+
+```qml
+Kirigami.ApplicationWindow {
+    // On a phone, assign it to `footer` instead.
+    header: Kirigami.NavigationTabBar {
+        actions: [
+            Kirigami.Action {
+                text: "Clock"
+                icon.name: "clock"
+                checked: true
+                onTriggered: pageStack.replace(clockPage)
+            },
+            Kirigami.Action {
+                text: "Alarms"
+                icon.name: "notifications"
+                onTriggered: pageStack.replace(alarmsPage)
+            }
+        ]
+    }
+}
+```
+
+Each tab is an [action](/components/actions/). The tab bar keeps exactly one of them checked. Switching tabs
+*replaces* the current page; it does not push a new one on top, because tabs are siblings, not steps.
+
+## Using it well
+
+- **Show the launch view as the first tab.**
+- **One or two words per tab**, in title case, with a distinct icon each.
+- **Keep the set fixed.** Tabs that appear and disappear make people lose their bearings.
+- **Do not combine it with a sidebar** for the same level of navigation. Pick one.
+
+## Properties you will use
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `actions` | list of actions | One per tab. Needs `text` and `icon.name`. |
+| `currentIndex` | int | Index of the selected tab. |
+| `maximumContentWidth` | number | On wide windows, keeps the tabs together in the middle instead of spreading across the full width. |

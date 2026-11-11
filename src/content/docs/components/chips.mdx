@@ -1,0 +1,92 @@
+---
+title: Chips
+summary: Small rounded labels for the tags, filters or properties attached to something.
+section: components
+order: 7
+cover: components/chips
+types: [Kirigami.Chip]
+sources:
+  - label: 'Kirigami tutorial: Chips'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-chips/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+A chip is a compact label with a frame. Chips come in groups: the tags on a photo, the filters applied to a
+list, the recipients of a message.
+
+<Example
+  name="components/chips"
+  alt="Three rows of chips. First row: Holiday, 2026 and Family, each with a red remove cross. Second row: Photos, Videos and Screenshots, with Photos highlighted. Third row: GPL-3.0 with an icon, and Linux."
+  caption="Three ways to use chips: removable tags, toggles, and read-only properties."
+/>
+
+## Three kinds
+
+| Kind | What the user can do | Set |
+| --- | --- | --- |
+| **Removable** | Remove it with the × | Nothing; this is the default |
+| **Toggle** | Switch it on and off | `closable: false` and `checkable: true` |
+| **Read-only** | Only read it | `closable: false` and `interactive: false` |
+
+<Callout title="The default has a remove button" kind="warning">
+  A chip shows its × unless you set `closable: false`. And the × does not remove anything by itself: it only
+  tells you, through `onRemoved`, that the user asked. Removing the item from your data is up to you.
+</Callout>
+
+## When to use chips
+
+- **Tags and labels** that the user adds and removes.
+- **Filters** for a list or a search: a row of toggles above the results.
+- **A few properties** of an item worth showing at a glance: licence, platform, category.
+
+Do not use chips for actions. “Save” is a [button](/components/actions/), not a chip. And do not use a single
+toggle chip for a setting; that is a checkbox or switch. See [Choosing controls](/patterns/controls/).
+
+## In code
+
+Chips are almost always generated from a list, with a `Repeater`:
+
+```qml
+Flow {
+    spacing: Kirigami.Units.smallSpacing
+
+    Repeater {
+        model: tagsModel
+
+        Kirigami.Chip {
+            required property string name
+            required property int index
+
+            text: name
+            onRemoved: tagsModel.remove(index)
+        }
+    }
+}
+```
+
+Put them in a `Flow`, as here, so that they wrap onto another line when the window is narrow.
+
+## Using chips well
+
+- **Keep the text to a word or two.**
+- **Space them `smallSpacing` apart**; they belong together.
+- **Do not mix kinds in one group.** A row where some chips toggle and others can be removed is confusing.
+- **If there can be many**, think about how the group looks with thirty of them, and whether a list would serve
+  better.
+
+## Properties you will use
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The label. |
+| `icon.name` | string | Optional icon before the label. |
+| `closable` | bool | Show the remove button. Default `true`. |
+| `onRemoved` | handler | Runs when the remove button is clicked. |
+| `checkable`, `checked` | bool | Make the chip a toggle, and its state. |
+| `interactive` | bool | `false` makes the chip a plain label that does not react to the pointer. Default `true`. |
+| `onClicked` | handler | Runs when the chip itself is clicked. |

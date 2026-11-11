@@ -1,0 +1,80 @@
+---
+title: '2. A list of tasks'
+summary: Show some tasks. This step introduces the three things every list is made of — the data, the view, and the template for one row.
+section: tutorial
+order: 2
+cover: tutorial/step2
+types: [ListModel, ListView, QQC2.CheckDelegate]
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="tutorial/step2"
+  alt="The window now shows three tasks, each with a checkbox. The first, Water the plants, is ticked."
+  caption="Three sample tasks."
+  codeLabel="Show the complete main.qml for this step"
+/>
+
+A list in Qt Quick always has three parts:
+
+| Part | Its job | Here |
+| --- | --- | --- |
+| **Model** | Holds the data | `ListModel` |
+| **View** | Lays out the rows and scrolls | `ListView` |
+| **Delegate** | The template for one row | `QQC2.CheckDelegate` |
+
+## Add the data
+
+Inside the window, above `pageStack.initialPage`, add a model with three sample tasks:
+
+```qml
+ListModel {
+    id: tasksModel
+
+    ListElement { title: "Water the plants"; done: true }
+    ListElement { title: "Reply to Konqi"; done: false }
+    ListElement { title: "Book train tickets"; done: false }
+}
+```
+
+Each `ListElement` is one task with two fields: its `title`, and whether it is `done`. The names are our
+choice. The samples let us see something straight away; they go away again in the last step.
+
+## Show it
+
+Replace the label in the page with a list view:
+
+```qml
+ListView {
+    model: tasksModel
+    currentIndex: -1
+
+    delegate: QQC2.CheckDelegate {
+        required property string title
+        required property bool done
+
+        width: ListView.view.width
+        text: title
+        checked: done
+    }
+}
+```
+
+- **`model: tasksModel`** connects the view to the data, using the `id` we gave the model.
+- **`delegate`** is created once for every task. `QQC2.CheckDelegate` is a ready-made row with a text and a
+  checkbox.
+- **The two `required property` lines** are how a row receives its data. For each row, the view looks for
+  fields in the model with these names and fills them in.
+- **`width: ListView.view.width`** makes each row as wide as the list. Every delegate needs this line.
+- **`currentIndex: -1`** says that no row is “the current one”. Lists that are for picking an item highlight
+  the current row; ours is for ticking, so no row should look selected.
+
+The list is the *direct* child of the scrollable page, which is what makes it fill the page and scroll properly.
+More on all of this in [List items](/components/lists/).
+
+## Try it
+
+Click a checkbox: it toggles. But that is only the checkbox's own on-screen state. The model still says what it
+said before, as you will notice once other parts of the app start reading from it. We fix that in step 4.

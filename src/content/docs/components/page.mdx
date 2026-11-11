@@ -1,0 +1,141 @@
+---
+title: Pages
+summary: A page is one screen of your app. Kirigami gives it a title bar, room for actions, and navigation that adapts from desktop to phone.
+section: components
+order: 1
+cover: components/page
+types: [Kirigami.ApplicationWindow, Kirigami.Page, Kirigami.ScrollablePage, Kirigami.GlobalDrawer]
+sources:
+  - label: 'KDE HIG: Layout and navigation'
+    url: https://develop.kde.org/hig/layout_and_nav/
+  - label: 'Kirigami tutorial: Explaining pages'
+    url: https://develop.kde.org/docs/getting-started/kirigami/introduction-pages/
+  - label: 'Kirigami tutorial: Page rows and page stacks'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-pagerow_pagestack/
+  - label: 'Kirigami tutorial: Scrollable pages and list views'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-scrollablepages_listviews/
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+A Kirigami app is a window that shows **pages**. You describe what is on each page and which actions it offers;
+Kirigami draws the header, places the actions, and handles moving between pages.
+
+<Example
+  name="components/page"
+  alt="A notes app window with a sidebar, a header reading All Notes with a New Note button and a search button, and a list of five notes"
+  caption="A complete small app: one window, one sidebar, one page."
+  scale={0.9}
+  markers={[
+    { x: 11, y: 45, label: '<strong>Global drawer.</strong> The app-wide sidebar, for moving between top-level places.' },
+    { x: 41, y: 8.6, label: '<strong>Title.</strong> Comes from the page’s <code>title</code>.' },
+    { x: 76, y: 8.6, label: '<strong>Actions.</strong> Come from the page’s <code>actions</code>. See <a href="../actions/">Actions and toolbars</a>.' },
+    { x: 65, y: 60, label: '<strong>Content.</strong> Whatever you put inside the page.' },
+  ]}
+/>
+
+## The pieces
+
+| Type | What it is |
+| --- | --- |
+| `Kirigami.ApplicationWindow` | The window. It owns the page stack and the drawers. An app has one. |
+| `Kirigami.Page` | A page whose content fits on screen without scrolling. |
+| `Kirigami.ScrollablePage` | A page whose content can be longer than the screen. Use this for lists and long forms. |
+| `Kirigami.GlobalDrawer` | The sidebar with app-wide destinations or actions. |
+| `pageStack` | The window's stack of open pages. You `push` a page to go deeper and `pop` to go back. |
+
+## Page or ScrollablePage?
+
+- Use **`ScrollablePage`** when the content is a list, a grid, or anything that may not fit: long text, a form,
+  a set of cards. It adds scrolling, a scrollbar, and keeps the focused field visible when an on-screen keyboard
+  opens.
+- Use **`Page`** when the content should always fill exactly the available space: a map, an image viewer, a
+  canvas, an empty-state message.
+
+<Callout title="Put the list directly in the page" kind="warning">
+  When a `ScrollablePage` contains a `ListView` or `GridView`, make the view the page's direct child, as in the
+  example above. Do not wrap it in your own `ScrollView` or `Flickable`, and do not put a `ListView` inside a
+  `ColumnLayout` in a scrollable page: you would get two competing scrollbars or a list with no height.
+</Callout>
+
+## Padding
+
+A `Page` puts one `Kirigami.Units.gridUnit` of padding around its content. That is right for forms, text and
+cards. A list or grid that fills the whole page should touch the edges; `ScrollablePage` removes the padding for
+you when its child is a list view. If you fill a plain `Page` with something edge to edge, set `padding: 0`.
+
+## Moving between pages
+
+```qml
+Kirigami.ApplicationWindow {
+    pageStack.initialPage: notesPage
+
+    Component {
+        id: notePage
+        Kirigami.Page {
+            title: "Shopping list"
+        }
+    }
+
+    // Somewhere in notesPage, when a note is clicked:
+    //     applicationWindow().pageStack.push(notePage)
+}
+```
+
+On a wide window, pushed pages appear side by side as columns. On a narrow window or a phone, only the newest page
+is shown and a back button appears in the header. You get both behaviours from the same `push` call.
+
+## Choosing navigation
+
+The full picture is on [Layout and navigation](/patterns/navigation/). In short:
+
+How people move around your app depends on how many top-level places it has.
+
+| Your app has… | Use |
+| --- | --- |
+| One flow that goes deeper step by step | The page stack alone: `pageStack.push()` |
+| Up to five top-level places | `Kirigami.NavigationTabBar` |
+| More than five top-level places | A `Kirigami.GlobalDrawer` sidebar |
+
+Whatever you choose, show the view people see at launch as the first item.
+
+For a sidebar that is always visible on desktop, set `modal: false` on the drawer, as the example does. On a
+phone the same drawer slides in from the edge on demand.
+
+## Desktop and phone
+
+The same app should work on both, but not by shrinking. The guidelines place things differently depending on the
+width available:
+
+| Element | Wide window | Narrow window or phone |
+| --- | --- | --- |
+| Toolbar | Above the content | Below the content, within reach of thumbs |
+| Sidebar | At the leading edge | First page of the stack, or opened on demand |
+| Preview or tool panel | At the trailing edge | Opened on demand |
+| Navigation tab bar | Above the content | Below the content |
+| Menu bar | Above the toolbar | A menu button on the toolbar |
+| Status bar | Below the content | Left out |
+
+Kirigami's pages, action toolbars and drawers already move this way. To make your own decisions in code, check
+`Kirigami.Settings.isMobile` for phones and `Kirigami.Settings.tabletMode` for touch-first use. To try the phone
+layout on your desktop, start the app with `QT_QUICK_CONTROLS_MOBILE=1`.
+
+## Properties you will use
+
+### On a page
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `title` | string | Text shown in the header. |
+| `actions` | list of actions | Buttons shown in the header. |
+| `padding` | number | Space around the content. Set `0` for edge-to-edge content. |
+| `header`, `footer` | item | Your own item pinned above or below the content, for example a search field or an inline message. |
+| `globalToolBarStyle` | enum | How the header looks for this page; `Kirigami.ApplicationHeaderStyle.None` hides it. |
+
+### Extra on ScrollablePage
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `supportsRefreshing` | bool | Allows pull-down-to-refresh on touch screens. |
+| `refreshing` | bool | Becomes `true` when the user pulls down. Set it back to `false` when loading is done. |

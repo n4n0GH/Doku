@@ -1,0 +1,147 @@
+---
+title: Drawers
+summary: Panels attached to an edge of the window. The global drawer is the app’s sidebar; other drawers slide in when asked.
+section: components
+order: 9
+cover: components/drawer-global
+types: [Kirigami.GlobalDrawer, Kirigami.ContextDrawer, Kirigami.OverlayDrawer]
+sources:
+  - label: 'Kirigami tutorial: Drawers'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-drawers/
+  - label: 'KDE HIG: Layout and navigation'
+    url: https://develop.kde.org/hig/layout_and_nav/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+| Drawer | Edge | Holds |
+| --- | --- | --- |
+| `Kirigami.GlobalDrawer` | Leading (left in English) | Things that apply to the whole app: its main places, or its main menu |
+| `Kirigami.ContextDrawer` | Trailing | Actions for the page currently shown |
+| `Kirigami.OverlayDrawer` | Any | Whatever you put in it |
+
+## Global drawer
+
+<Example
+  name="components/drawer-global"
+  alt="A photos app with a sidebar. At the top of the sidebar is an icon and the title Photos; below are Library, Albums, People and Places, a dividing line, and Settings. Library is highlighted."
+  caption="A global drawer used as an always-visible sidebar."
+  scale={0.9}
+  markers={[
+    { x: 19, y: 5, label: '<strong>Title and icon.</strong> Optional; from <code>title</code> and <code>titleIcon</code>.' },
+    { x: 16, y: 38, label: '<strong>Actions.</strong> One entry each. The checked one is highlighted.' },
+    { x: 18, y: 65, label: '<strong>Separator.</strong> An action with <code>separator: true</code> divides groups.' },
+  ]}
+/>
+
+Set it on the window's `globalDrawer` property and give it [actions](/components/actions/):
+
+```qml
+Kirigami.ApplicationWindow {
+    globalDrawer: Kirigami.GlobalDrawer {
+        modal: false
+        actions: [
+            Kirigami.Action {
+                text: "Library"
+                icon.name: "view-list-icons"
+                onTriggered: pageStack.replace(libraryPage)
+            }
+        ]
+    }
+}
+```
+
+An action with child actions becomes an entry that opens a second level inside the drawer.
+
+### Sidebar or menu?
+
+The same component serves two purposes, chosen with two properties:
+
+| You want… | Set | Result |
+| --- | --- | --- |
+| A sidebar that is always visible on desktop | `modal: false` | A fixed column beside the content, as pictured |
+| A panel opened from a ☰ button | nothing (the default) | Slides in over the content and dims it; closes on a click outside |
+| An ordinary menu on desktop | `isMenu: true` | The ☰ button opens a normal popup menu. The title and header are not shown in this mode |
+
+Use the sidebar when the drawer is how people move around the app and there are more than five places; with
+fewer, a [navigation tab bar](/components/navigation-tab-bar/) is lighter. Use the menu form when the drawer
+only holds a handful of app-wide commands; a full panel for three entries is too much on a desktop.
+
+On a phone the drawer always slides in from the edge, by button or by swipe, whichever you chose.
+
+### A header that stays
+
+Anything set as the drawer's `header` stays in place when the user goes into a second level. It replaces the
+title. A [search field](/components/text-fields/) is a common choice.
+
+## Context drawer
+
+A `Kirigami.ContextDrawer` shows the actions of the current page. You rarely interact with it directly: set it
+on the window's `contextDrawer` property, and it picks up each page's `actions`.
+
+```qml
+Kirigami.ApplicationWindow {
+    contextDrawer: Kirigami.ContextDrawer {}
+}
+```
+
+On a desktop with enough room the page's actions are simply shown in its header and the drawer stays out of the
+way. When there is no room, and on phones, they are reached through a menu button at the trailing edge, or by
+swiping in from that edge.
+
+## Overlay drawer
+
+<Example
+  name="components/drawer-overlay"
+  alt="A music player page, dimmed, with a white panel risen from the bottom edge listing Add to Playlist, Share and Show Album"
+  caption="A modal overlay drawer on the bottom edge, offering a few options for the current item."
+  scale={0.9}
+/>
+
+`Kirigami.OverlayDrawer` is the general form: a panel on any edge with your own content. It has two
+behaviours.
+
+| | Modal (`modal: true`) | Inline (`modal: false`) |
+| --- | --- | --- |
+| Starts | Hidden | Shown |
+| Rest of the app | Dimmed, not usable | Stays usable |
+| Click outside | Closes it | Does nothing |
+| Good for | A short list of options for one item, for example after a long press | A tool panel that stays beside the content |
+
+For read-only content that may scroll, use an [overlay sheet](/components/overlay-sheet/) instead; for a
+question, a [dialog](/components/dialogs/).
+
+## Using drawers well
+
+- **Put the launch view first** in a navigation drawer.
+- **Give every entry an icon and a short title-case label**, and do not repeat icons.
+- **App-wide things in the global drawer, page things in page actions.** Do not put “Delete Note” in the sidebar.
+- **Do not put Quit or Minimize in a drawer.** The window has those.
+- **Do not hide the app's main feature in a drawer** that is closed by default.
+
+## Properties you will use
+
+### Kirigami.GlobalDrawer
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `actions` | list of actions | The entries. |
+| `modal` | bool | `false` keeps the drawer visible beside the content on desktop. |
+| `isMenu` | bool | Show as an ordinary popup menu on desktop. Default `false`. |
+| `title`, `titleIcon` | string | Heading and icon at the top. |
+| `header`, `footer` | item | Your own item pinned to the top or bottom, such as a search field. |
+| `collapsible`, `collapsed` | bool | Let a sidebar shrink to a strip of icons. |
+
+### Kirigami.OverlayDrawer
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `edge` | enum | `Qt.LeftEdge`, `Qt.RightEdge`, `Qt.TopEdge` or `Qt.BottomEdge`. |
+| `modal` | bool | Modal or inline, see the table above. |
+| `drawerOpen` | bool | Whether the drawer is open. Set it, or call `open()` and `close()`. |
+| `contentItem` | item | What the drawer shows. |
+| `handleVisible` | bool | Show a small tab at the edge for opening and closing. |

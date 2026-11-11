@@ -1,0 +1,85 @@
+---
+title: Overlay sheets
+summary: A panel that floats over the page to show extra content for reading. It scrolls if the content is long and closes with a click outside.
+section: components
+order: 14
+cover: components/overlay-sheet
+types: [Kirigami.OverlaySheet]
+sources:
+  - label: 'KDE HIG: Displaying content'
+    url: https://develop.kde.org/hig/displaying_content/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="components/overlay-sheet"
+  alt="A dimmed page with a white panel in front of it. The panel has the title What’s New in 2.4, a close button, and four short paragraphs of release notes."
+  caption="An overlay sheet with a title and text content."
+  scale={0.9}
+/>
+
+## When to use it
+
+Use an overlay sheet for **secondary content that people read and then dismiss**: release notes, the details of
+an item, a licence text, a help topic.
+
+| You want to… | Use |
+| --- | --- |
+| Show read-only content over the page | An overlay sheet |
+| Ask a question or collect input | A [dialog](/components/dialogs/) |
+| Show content big enough to fill the window | A new [page](/components/page/) |
+| Offer a few options for an item | An [overlay drawer](/components/drawers/) or `Kirigami.MenuDialog` |
+
+<Callout title="Sheets are for reading" kind="warning">
+  Do not put text fields, checkboxes or other input in a sheet. A sheet closes when someone clicks beside it,
+  and whatever they had entered would be lost without warning. Input belongs in a dialog, which has explicit
+  buttons to confirm or cancel.
+</Callout>
+
+## In code
+
+Declare the sheet, put the content inside it, and call `open()`:
+
+```qml
+Kirigami.OverlaySheet {
+    id: newsSheet
+    title: "What’s New in 2.4"
+
+    QQC2.Label {
+        wrapMode: Text.WordWrap
+        text: releaseNotes
+    }
+}
+
+QQC2.Button {
+    text: "What’s New"
+    onClicked: newsSheet.open()
+}
+```
+
+The sheet takes its size from its content and scrolls by itself when the content is taller than the window. Do
+not wrap the content in a scroll view of your own. Give text `wrapMode: Text.WordWrap` so the sheet does not
+try to grow as wide as the longest paragraph.
+
+A list can go directly into a sheet as well: make a `ListView` the sheet's only child.
+
+## Using sheets well
+
+- **Give it a title** that names the content.
+- **One sheet at a time**, and never a sheet on top of a dialog or the other way round.
+- **Keep it secondary.** If people need this content to do the main task, it should be on the page.
+
+## Properties you will use
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `title` | string | Heading at the top of the sheet. |
+| `showCloseButton` | bool | Show a × in the corner. On by default on desktop, off on phones, where tapping outside or swiping closes the sheet. |
+| `header` | item | Replaces the title with your own item. |
+| `footer` | item | An item pinned to the bottom, below the scrolling content. |
+| `open()`, `close()` | methods | Show and hide the sheet. |

@@ -1,0 +1,26 @@
+---
+// One half of a do/don't pair. Shows either a real render (`example`) or a
+// short piece of interface text (`sample`), with the reason in the slot.
+import Shot from './Shot.astro';
+
+interface Props {
+  example?: string;
+  alt?: string;
+  sample?: string;
+  /** Pin the render to one colour scheme. */
+  theme?: 'light' | 'dark';
+}
+
+const { example, alt = '', sample, theme } = Astro.props;
+---
+
+<div class="verdict dont">
+  <div class="figure-stage">
+    {example && <Shot name={example} alt={alt} theme={theme} />}
+    {sample && <span class="verdict-sample">{sample}</span>}
+  </div>
+  <div class="verdict-body">
+    <span class="verdict-label">Don’t</span>
+    <slot />
+  </div>
+</div>

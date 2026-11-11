@@ -1,0 +1,136 @@
+---
+title: '7. Remembering the list'
+summary: Save the tasks whenever they change and load them at start. Then look at the finished app and where to go from here.
+section: tutorial
+order: 7
+cover: tutorial/shot-phone
+types: [Settings]
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+Close the app and open it again: your tasks are gone and the three samples are back. The last step fixes that.
+
+## Somewhere to keep the data
+
+Qt's `Settings` type stores values in a small file and gives them back on the next start. Add its import as
+the first line of the file:
+
+```qml
+import QtCore
+```
+
+Now replace the model and its sample tasks with an empty model and a `Settings` object:
+
+```qml
+ListModel {
+    id: tasksModel
+}
+
+Settings {
+    id: settings
+    location: StandardPaths.writableLocation(StandardPaths.GenericConfigLocation) + "/tasks-tutorial.ini"
+
+    property string tasks: "[]"
+}
+```
+
+- **`location`** says which file to use: `tasks-tutorial.ini` in the user's configuration folder, normally
+  `~/.config`. A packaged app with a proper name does not need this line; `Settings` then picks a file
+  named after the app.
+- **`property string tasks`** is the one value we store. Any property declared inside `Settings` is saved
+  when it changes and restored at start. `"[]"` is its value the very first time: an empty list.
+
+Settings store simple values, not lists of objects, so we keep the whole task list as one piece of text in JSON
+format.
+
+## Load and save
+
+```qml
+function load(): void {
+    for (const task of JSON.parse(settings.tasks)) {
+        tasksModel.append({ title: task.title, done: task.done })
+    }
+}
+
+function save(): void {
+    const list = []
+    for (let i = 0; i < tasksModel.count; i++) {
+        list.push({ title: tasksModel.get(i).title, done: tasksModel.get(i).done })
+    }
+    settings.tasks = JSON.stringify(list)
+}
+```
+
+`load` turns the stored text back into tasks and puts them in the model. `save` does the reverse.
+
+When should we save? Whenever anything changes, and we already have a place that hears about every change: the
+`Connections` from step 5. Add a `save()` call to both handlers, and load at start:
+
+```qml
+Connections {
+    target: tasksModel
+    function onCountChanged() {
+        root.recount()
+        root.save()
+    }
+    function onDataChanged() {
+        root.recount()
+        visibleTasks.invalidateFilter()
+        root.save()
+    }
+}
+
+Component.onCompleted: {
+    load()
+    recount()
+}
+```
+
+There is no Save button and none is needed. An app that saves by itself cannot lose work.
+
+## The finished app
+
+<Example
+  name="tutorial/step7"
+  alt="The app as it opens for the first time after this step: no tasks, and the placeholder message inviting to add one"
+  caption="First start after this step: the samples are gone and the list is truly empty. Add tasks, close the window, start again, and they are back."
+  codeLabel="Show the complete main.qml for this step"
+/>
+
+<Example
+  name="tutorial/shot-final"
+  alt="The finished app with four tasks, one of them done"
+  caption="After adding a few tasks."
+  code={false}
+/>
+
+## What you built, and what made it short
+
+About 250 lines, and a good part of what makes it feel like a KDE app was never written by you:
+
+| You got… | Because you used… |
+| --- | --- |
+| Light and dark looks, in any colour scheme | Standard controls and no colour values. [Colour](/foundations/colour/) |
+| Sizes that follow the user's font | `Kirigami.Units`. [Spacing and units](/foundations/spacing/) |
+| A phone layout with actions at the bottom | Page `actions`. [Layout and navigation](/patterns/navigation/) |
+| Buttons that move into an overflow menu when space runs out | The same. [Actions and toolbars](/components/actions/) |
+| Keyboard navigation through the list | Standard delegates. [List items](/components/lists/) |
+| An empty screen that explains itself | [Placeholder messages](/components/placeholder-message/) |
+| Deleting without fear | Undo. [Feedback and status](/patterns/feedback/) |
+
+Try the phone layout with `QT_QUICK_CONTROLS_MOBILE=1 qml6 main.qml`, and switch your desktop to a dark
+colour scheme while the app is open.
+
+## Ideas for going further
+
+- **Edit a task.** Double-click a row to turn its label into a text field. `TapHandler` can detect the double
+  click.
+- **Keyboard shortcuts.** Give “Clear Completed” a `shortcut`, and let Ctrl+N move focus to the entry field
+  with the field's `focusSequence`.
+- **Undo for “Clear Completed”.** It removes several tasks at once, which is exactly when undo matters most.
+- **Due dates.** Add a field to each task, show it as a subtitle, and sort by it; the proxy model can sort as
+  well as filter.
+- **Make it a real app** with a launcher, an icon, translations and an About page. That is where the upstream
+  [Kirigami tutorial](https://develop.kde.org/docs/getting-started/kirigami/) takes over.

@@ -1,0 +1,100 @@
+---
+title: Feedback and status
+summary: How to tell people what happened, what is happening, and what went wrong, using the quietest means that still gets the message across.
+section: patterns
+order: 4
+cover: patterns/undo
+sources:
+  - label: 'KDE HIG: Communicating status changes'
+    url: https://develop.kde.org/hig/status_changes/
+  - label: 'KDE HIG: Simple by default'
+    url: https://develop.kde.org/hig/simple_by_default/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+## Say less
+
+The best status message is none. When something works, the result is the message: the file is in the list, the
+switch is on, the page changed. Reserve explicit messages for things people could not otherwise know.
+
+When you do need to say something, pick the least disruptive channel that fits:
+
+| What happened | Channel | How |
+| --- | --- | --- |
+| A small thing succeeded and the result is visible | Nothing | |
+| A small thing happened that could be missed | **Passive notification**: a short line that fades by itself | `showPassiveNotification()` |
+| Something needs attention, maybe action | **Inline message**: stays until dealt with | [Inline messages](/components/inline-message/) |
+| The app cannot continue without an answer | **Dialog** | [Dialogs](/components/dialogs/) |
+| Something happened while the app was not in view | **System notification** | KNotifications |
+
+Do not use system notifications for things that happen while the user is looking at your window; they already
+see it. And do not keep a system tray icon around as a way to stay visible; the guidelines call the tray a last
+resort, shown only when something unusual needs attention and no window is open.
+
+## Undo instead of asking
+
+<Example
+  name="patterns/undo"
+  alt="A list of notes with a small dark bar floating at the bottom that reads Meeting notes moved to the trash, with an Undo button"
+  caption="The note is already gone from the list. For a few seconds, one click brings it back."
+  scale={0.9}
+/>
+
+Asking “Are you sure?” before every deletion trains people to click Yes without reading. It is better to do
+what was asked and make it easy to take back.
+
+- **The easier something is to remove, the easier it must be to restore.**
+- **Move things to the trash** instead of deleting them outright.
+- **Offer Undo** for any removal that would be tedious to redo by hand. If the deletion truly has to be final,
+  delay it: remove the item from view, and only delete for real once the chance to undo has passed.
+- **The undo offer must not block anything.** A passive notification suits small losses, because it disappears
+  after a few seconds. For something serious, such as deleting files, use an inline message, which stays until
+  dismissed.
+- **Keep confirmation dialogs** for actions that cannot be undone at all.
+
+```qml
+// text, how long to show it, button label, what the button does
+applicationWindow().showPassiveNotification(
+    "“Meeting notes” moved to the trash", "long", "Undo",
+    () => notesModel.restore(note))
+```
+
+## When something goes wrong
+
+In order of preference:
+
+1. **Make the error impossible**, or recover from it without bothering anyone.
+2. Describe the problem and offer **a button that fixes it**.
+3. Describe the problem and **say how to proceed**.
+4. Describe the problem. Only when truly nothing can be done.
+
+Two things are never acceptable: showing technical gibberish, and failing silently. See
+[Inline messages](/components/inline-message/) for how to word and show an error.
+
+## While something is happening
+
+Show progress for anything that takes longer than about a second.
+
+<Example
+  name="components/progress"
+  alt="A half-filled progress bar labelled Known amount, and a spinning indicator labelled Unknown amount"
+  caption="A bar when you know how far along you are, a spinner when you do not."
+/>
+
+- **Prefer a real measure.** If you know how many items or how much time is left, show a determinate bar, and say
+  the numbers (“312 of 840”). Plain technical detail is welcome here.
+- **Use a spinner only when you cannot know.**
+- **For a view that is still loading**, put a `Kirigami.LoadingPlaceholder` where the content will appear.
+- **For work the user started that continues in the background**, show progress on the app's Task Manager icon.
+
+See [Progress and loading](/components/progress/).
+
+## Colour as a signal
+
+Blue highlights, orange warns, red means error or danger. Use them sparingly, and never alone: always add an
+icon or words. See [Colour](/foundations/colour/).

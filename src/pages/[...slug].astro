@@ -1,0 +1,120 @@
+---
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Link from '../components/Link.astro';
+import { SECTIONS, docPath, orderedDocs, url } from '../lib/site';
+
+export async function getStaticPaths() {
+  const docs = await orderedDocs();
+  return docs.map((doc, i) => ({
+    params: { slug: doc.id.replace(/\.mdx$/, '') },
+    props: { doc, prev: docs[i - 1], next: docs[i + 1], docs },
+  }));
+}
+
+const { doc, prev, next, docs } = Astro.props;
+const { Content, headings } = await render(doc);
+const section = SECTIONS.find((s) => s.id === doc.data.section)!;
+const toc = headings.filter((h) => h.depth === 2);
+---
+
+<Base title={doc.data.title} description={doc.data.summary} hasSidebar>
+  <div class="shell">
+    <nav class="sidebar" aria-label="Guide">
+      {
+        SECTIONS.map((s) => (
+          <>
+            <h2>{s.title}</h2>
+            <ul>
+              {docs
+                .filter((d) => d.data.section === s.id)
+                .map((d) => (
+                  <li>
+                    <a href={url(docPath(d))} aria-current={d.id === doc.id ? 'page' : undefined}>
+                      {d.data.title}
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </>
+        ))
+      }
+    </nav>
+
+    <div class="main">
+      <main class="article" data-pagefind-body>
+        <p class="eyebrow">{section.title}</p>
+        <h1>{doc.data.title}</h1>
+        <p class="lead">{doc.data.summary}</p>
+        {
+          doc.data.types.length > 0 && (
+            <ul class="type-chips" aria-label="QML types covered on this page">
+              {doc.data.types.map((t) => (
+                <li>
+                  <code>{t}</code>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+
+        <div class="prose">
+          <Content components={{ a: Link }} />
+        </div>
+
+        {
+          doc.data.sources.length > 0 && (
+            <section class="sources" data-pagefind-ignore>
+              <h2>Where this comes from</h2>
+              <ul>
+                {doc.data.sources.map((s) => (
+                  <li>
+                    <a href={s.url}>{s.label}</a>
+                  </li>
+                ))}
+              </ul>
+              <p>
+                This page restates the upstream KDE documentation in plainer words and adds pictures. When the two
+                disagree, upstream wins.
+              </p>
+            </section>
+          )
+        }
+
+        <nav class="pager" aria-label="Previous and next page" data-pagefind-ignore>
+          {
+            prev && (
+              <a href={url(docPath(prev))}>
+                <small>Previous</small>
+                {prev.data.title}
+              </a>
+            )
+          }
+          {
+            next && (
+              <a class="next" href={url(docPath(next))}>
+                <small>Next</small>
+                {next.data.title}
+              </a>
+            )
+          }
+        </nav>
+      </main>
+
+      {
+        toc.length > 1 && (
+          <aside class="toc" aria-label="On this page">
+            <strong>On this page</strong>
+            <ul>
+              {toc.map((h) => (
+                <li>
+                  <a href={`#${h.slug}`}>{h.text}</a>
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )
+      }
+    </div>
+  </div>
+</Base>

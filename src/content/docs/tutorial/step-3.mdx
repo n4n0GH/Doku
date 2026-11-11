@@ -1,0 +1,82 @@
+---
+title: '3. Adding tasks'
+summary: A field above the list where a task can be typed and added with Enter or a click.
+section: tutorial
+order: 3
+cover: tutorial/step3
+types: [Kirigami.ActionTextField, Kirigami.Action]
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="tutorial/step3"
+  alt="The task list with a text field above it. The field shows the hint Add a task and has a plus button at its end."
+  caption="An entry field pinned above the list."
+  codeLabel="Show the complete main.qml for this step"
+/>
+
+## A function that adds a task
+
+Add this to the window, below the model:
+
+```qml
+function addTask(title: string): void {
+    const trimmed = title.trim()
+    if (trimmed.length > 0) {
+        tasksModel.append({ title: trimmed, done: false })
+    }
+}
+```
+
+`trim()` removes spaces at both ends, and the `if` refuses to add a task that has no text. Because of this
+check, nothing else in the app has to worry about empty tasks. The list updates by itself when the model changes;
+you never tell the view to refresh.
+
+## The entry field
+
+Give the page a `header`, above the `ListView`:
+
+```qml
+header: QQC2.ToolBar {
+    contentItem: Kirigami.ActionTextField {
+        id: newTaskField
+
+        placeholderText: "Add a task"
+        onAccepted: {
+            root.addTask(text)
+            clear()
+        }
+
+        rightActions: Kirigami.Action {
+            text: "Add Task"
+            icon.name: "list-add"
+            enabled: newTaskField.text.trim().length > 0
+            onTriggered: newTaskField.accepted()
+        }
+    }
+}
+```
+
+- **`header`** is a slot every page has. What you put there stays in place while the content scrolls, which
+  is what we want: the field should be reachable however long the list gets.
+- **`Kirigami.ActionTextField`** is a text field that can hold small buttons inside its frame. See
+  [Text fields](/components/text-fields/).
+- **`onAccepted`** runs when Enter is pressed. It hands the text to our function and empties the field, ready
+  for the next task.
+- **`rightActions`** adds the + button for people who prefer to click, and for touch screens. It does the
+  same thing as Enter by firing the field's own `accepted` signal, so there is only one code path.
+- **`enabled`** greys the button out while there is nothing to add.
+
+## Why these choices
+
+- The placeholder is a short instruction in sentence case, with no ellipsis, because the field has no label in
+  front of it. See [Typography and wording](/foundations/typography/).
+- The button has a `text` although only its icon shows. It is what a screen reader announces and what appears
+  as the tooltip. See [Actions and toolbars](/components/actions/).
+- The button is disabled, not hidden, when it cannot be used. Controls that come and go are harder to learn.
+
+## Try it
+
+Type a few tasks and press Enter after each. Try adding only spaces: nothing happens.

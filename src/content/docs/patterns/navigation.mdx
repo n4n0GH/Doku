@@ -1,0 +1,105 @@
+---
+title: Layout and navigation
+summary: How to arrange an app's main parts, how people move between them, and how the same app reshapes itself from a desktop window to a phone.
+section: patterns
+order: 1
+cover: patterns/navigation-columns
+sources:
+  - label: 'KDE HIG: Layout and navigation'
+    url: https://develop.kde.org/hig/layout_and_nav/
+  - label: 'KDE HIG: Powerful when needed'
+    url: https://develop.kde.org/hig/powerful_when_needed/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+## Where things go
+
+People look at the top-leading corner of a window first (top left in English). Put the most important thing
+there. On a phone, the easiest place to reach is the bottom, so that is where controls go.
+
+The guidelines give each part of an app a home, and a different one when space is short:
+
+| Part | Wide window | Narrow window or phone |
+| --- | --- | --- |
+| Toolbar | Above the content | Below the content |
+| Sidebar | At the leading edge | The first page of the stack, or opened on demand |
+| Preview or tool panel | At the trailing edge | Opened on demand |
+| Navigation tab bar | Above the content | Below the content |
+| Menu bar | Above the toolbar | A menu button on the toolbar |
+| Status bar | Below the content | Left out |
+
+If a view needs its own controls, such as a zoom slider for a grid, put them in a second toolbar directly under
+the main one.
+
+## Choosing how people get around
+
+Pick by the shape of your app, not by taste.
+
+| Your app has… | Use | See |
+| --- | --- | --- |
+| One flow that goes deeper step by step | The page stack: `pageStack.push()` | [Pages](/components/page/) |
+| Up to five top-level places | `Kirigami.NavigationTabBar` | [Navigation tab bar](/components/navigation-tab-bar/) |
+| More than five top-level places | A `Kirigami.GlobalDrawer` sidebar | [Drawers](/components/drawers/) |
+
+Whichever you choose, the view people see at launch should be the first item.
+
+## One app, two shapes
+
+<Example
+  name="patterns/navigation-columns"
+  alt="A wide window split in two columns: a list of notes on the left with Meeting notes selected, and the text of that note on the right with an Edit button in its header"
+  caption="On a wide window, a page pushed from a list appears beside it."
+  scale={0.9}
+  markers={[
+    { x: 22, y: 6.5, label: 'The first page: a list.' },
+    { x: 60, y: 6.5, label: 'The page pushed from it. Its title and actions get their own header.' },
+  ]}
+/>
+
+<Example
+  name="patterns/navigation-phone"
+  alt="The same app on a phone: only the note is shown, with a breadcrumb reading Notes then Meeting notes at the top, an Edit button in a bar near the bottom, and a tab bar with Notes, Favourites and Trash at the very bottom"
+  caption="The same two pages on a phone. Nothing in the code says “phone”; Kirigami rearranges the parts."
+  markers={[
+    { x: 66, y: 3.75, label: 'Only the newest page is visible. The breadcrumb leads back to the list.' },
+    { x: 60, y: 84, label: 'The page’s actions moved to the bottom, in reach of a thumb.' },
+    { x: 66.5, y: 95, label: 'The navigation tab bar sits at the bottom edge.' },
+  ]}
+/>
+
+Kirigami does much of this for you, but only if you let it:
+
+- **Build from pages, actions and drawers**, not from fixed-position items. They are the parts that know how to
+  move.
+- **Do not shrink a desktop layout onto a phone.** A phone needs fewer things on screen at once and bigger touch
+  targets. Check `Kirigami.Settings.isMobile` when you need to make a different choice, and
+  `Kirigami.Settings.tabletMode` for touch-first use on larger screens.
+- **Try it.** Start your app with `QT_QUICK_CONTROLS_MOBILE=1` to see the phone arrangement on your desktop, and
+  drag the window narrow to see the columns collapse.
+
+## Menus
+
+A menu button (☰) is fine while the menu has about 15 items or fewer. Beyond that, a real menu bar is easier to
+search by eye. Do not put Quit or Minimize in a menu button; the window already has those.
+
+## Keyboard, touchpad and touch
+
+- **Every action should be reachable from the keyboard.** Give standard actions their standard shortcut and let
+  people reassign shortcuts where you can.
+- **Shortcuts use a modifier plus a letter or number**, never a function key alone; laptop keyboards often hide
+  those behind another key. Leave the Meta key alone; it belongs to the desktop.
+- **Shortcuts, context menus and gestures are accelerators.** They make experts faster, but nothing important may
+  be reachable *only* that way. The main route is always something visible.
+- **On touchpads and touchscreens, use two-finger gestures only.** Three and four fingers are reserved for the
+  system. Scrolling with a touchpad should move content smoothly, pixel by pixel.
+
+## Right-to-left languages
+
+In Arabic, Hebrew and other right-to-left languages the whole layout is mirrored: sidebars move to the right, back
+arrows point the other way. That is why this guide says “leading” and “trailing” instead of left and right. Kirigami
+components and Qt Quick layouts mirror by themselves; images are not mirrored. Test with `LANGUAGE=ar_AR`.

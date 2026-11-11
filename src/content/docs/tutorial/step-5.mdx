@@ -1,0 +1,117 @@
+---
+title: '5. The empty state and a counter'
+summary: Make an empty list explain itself, and show how many tasks are left to do.
+section: tutorial
+order: 5
+cover: tutorial/shot-empty
+types: [Kirigami.PlaceholderMessage, Connections]
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+Delete every task in the app as it is now and you are left with a blank white area. Someone opening the app for
+the first time would see exactly that, and have to guess what to do.
+
+<Example
+  name="tutorial/shot-empty"
+  alt="The app with no tasks. In the middle of the empty list is a large tick icon, the text No tasks, and the hint Type in the field above and press Enter to add one."
+  caption="After this step: the empty list says what it is for."
+  code={false}
+/>
+
+## The placeholder
+
+Give the list view an `id` and put a placeholder message inside it:
+
+```qml
+ListView {
+    id: tasksView
+    model: tasksModel
+    currentIndex: -1
+
+    Kirigami.PlaceholderMessage {
+        anchors.centerIn: parent
+        width: parent.width - Kirigami.Units.gridUnit * 4
+        visible: tasksView.count === 0
+
+        icon.name: "checkmark"
+        text: "No tasks"
+        explanation: "Type in the field above and press Enter to add one."
+    }
+
+    delegate: QQC2.ItemDelegate {
+        // … unchanged …
+    }
+}
+```
+
+The message sits in the middle of the list and is visible only while the list has no rows. Its width is limited
+so that the explanation wraps instead of touching the edges. See
+[Placeholder messages](/components/placeholder-message/).
+
+## Counting what is left
+
+<Example
+  name="tutorial/step5"
+  alt="The task list with a bar at the bottom that reads 2 tasks left"
+  caption="A footer with the number of open tasks."
+  codeLabel="Show the complete main.qml for this step"
+/>
+
+The window needs to know how many tasks are not done. Add a property for the number, a function that works it
+out, and something that calls the function at the right moments:
+
+```qml
+property int remaining: 0
+
+function recount(): void {
+    let open = 0
+    for (let i = 0; i < tasksModel.count; i++) {
+        if (!tasksModel.get(i).done) {
+            open++
+        }
+    }
+    remaining = open
+}
+
+Connections {
+    target: tasksModel
+    function onCountChanged() { root.recount() }
+    function onDataChanged() { root.recount() }
+}
+
+Component.onCompleted: recount()
+```
+
+- **`property int remaining`** is a value that other parts of the file can use. Whenever it changes,
+  everything that uses it updates.
+- **`Connections`** listens to the model. `onCountChanged` fires when a task is added or removed,
+  `onDataChanged` when one is ticked or unticked. Either way we count again.
+- **`Component.onCompleted`** runs once at start, for the first count.
+
+Then show the number in a footer on the page, next to the `header`:
+
+```qml
+footer: QQC2.ToolBar {
+    visible: tasksModel.count > 0
+
+    contentItem: QQC2.Label {
+        leftPadding: Kirigami.Units.largeSpacing
+        text: root.remaining === 1 ? "1 task left" : root.remaining + " tasks left"
+    }
+}
+```
+
+Like the header, the footer stays put while the list scrolls. It hides when there are no tasks at all, since
+“0 tasks left” under “No tasks” would say the same thing twice.
+
+<Callout title="Singular and plural">
+  The text is chosen by hand here: “1 task left”, “2 tasks left”. A real, translatable app would use
+  `i18np("1 task left", "%1 tasks left", root.remaining)` instead, because many languages have more than two
+  plural forms.
+</Callout>
+
+## Try it
+
+Tick and untick tasks and watch the number. Delete everything to see the placeholder, then add a task.

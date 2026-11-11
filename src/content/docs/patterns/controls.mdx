@@ -1,0 +1,107 @@
+---
+title: Choosing controls
+summary: Which control to use for which kind of question, and how to explain a setting without cluttering the page.
+section: patterns
+order: 3
+cover: patterns/controls
+sources:
+  - label: 'KDE HIG: Getting input'
+    url: https://develop.kde.org/hig/getting_input/
+  - label: 'KDE HIG: Displaying content'
+    url: https://develop.kde.org/hig/displaying_content/
+  - label: 'Kirigami tutorial: Controls and interactive elements'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-controls/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="patterns/controls"
+  alt="A form with five rows: a switch for Night light, a checkbox for restoring windows on startup, two radio buttons for what clicking files does, a combo box for language, and a slider with a number box for volume"
+  caption="Five kinds of question, five controls. All are ordinary Qt Quick Controls in a form layout."
+/>
+
+## The right control for the question
+
+| The user is… | Use | Notes |
+| --- | --- | --- |
+| Turning something on or off, **effective at once** | `QQC2.Switch` | Flipping it is the action; there is no Apply. |
+| Turning something on or off, otherwise | `QQC2.CheckBox` | Also the right choice for ticking items in a list. |
+| Picking one of **two or three** options | `QQC2.RadioButton` | All options stay visible. Keep their texts short. |
+| Picking one of **up to about ten** | `QQC2.ComboBox` | |
+| Picking one of **more than ten** | A scrollable list | A long drop-down is hard to scan and to scroll. |
+| Setting a rough amount quickly | `QQC2.Slider` | Volume, brightness, zoom. |
+| Setting an exact number | `QQC2.SpinBox` | |
+| Both rough and exact | A slider followed by a spin box | As in the last row of the picture. |
+| Typing text | A [text field](/components/text-fields/) | |
+| Picking a file or folder | `FileDialog` from `QtQuick.Dialogs` | Never build your own file picker. |
+
+### Buttons
+
+| Where | Use |
+| --- | --- |
+| On a toolbar | `QQC2.ToolButton`, or better, [actions](/components/actions/) |
+| Floating over content, one main action | `QQC2.RoundButton`, icon only |
+| Everywhere else | `QQC2.Button` |
+
+A button that opens a menu shows a small downward arrow. A button whose action needs more input before anything
+happens ends its label with an ellipsis: “Save As…”.
+
+## Rules that apply to all of them
+
+<DoDont>
+  <Do sample="☑ Mute notifications">
+    Keep the label fixed and let the control show the state.
+  </Do>
+  <Dont sample="Mute  →  Unmute">
+    Change a control's label or icon when it is switched. Nobody can tell whether the text names the state or the
+    action.
+  </Dont>
+</DoDont>
+
+- **Order options logically**: smallest to largest, most to least common. When there is no natural order, sort
+  alphabetically.
+- **Use web-style links only for web addresses.** An underlined link opens something in the browser. Do not use
+  one to move around inside your app; that is what buttons and list items are for.
+- **Check text as it is typed.** If the input is not valid, say why in an
+  [inline message](/components/inline-message/) and disable the confirm button until it is.
+- **Apply settings at once.** A changed setting should take effect immediately, without asking for a restart.
+
+## Explaining a control
+
+Good labels need no explanation. When one is needed anyway, choose the lightest form that works:
+
+<Example
+  name="patterns/inline-help"
+  alt="Two settings. Under the first checkbox is a small grey sentence of explanation. Next to the second checkbox is a small round i button."
+  caption="Top: one sentence under the control. Bottom: a help button for an explanation too long to show all the time."
+/>
+
+| The explanation is… | Use |
+| --- | --- |
+| One short sentence about one control | A label directly under the control |
+| One or two sentences about the whole page | Text at the top of the page |
+| Longer, and only some people need it | `Kirigami.ContextualHelpButton` beside the control |
+| Much longer | A “Details” or “Show More” section, or a separate page |
+
+<Callout title="Tooltips are not for important things" kind="warning">
+  A tooltip shows only when a pointer rests on a control. Touch users and keyboard users may never see it. Use
+  tooltips to name icon-only buttons and to add nice-to-have detail, never for something people must know.
+</Callout>
+
+```qml
+RowLayout {
+    Kirigami.FormData.label: "Privacy:"
+
+    QQC2.CheckBox {
+        text: "Share usage statistics"
+    }
+    Kirigami.ContextualHelpButton {
+        toolTipText: "Anonymous numbers such as how often the app is opened."
+    }
+}
+```

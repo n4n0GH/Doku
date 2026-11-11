@@ -1,0 +1,77 @@
+---
+title: What we will build
+summary: A to-do app in about 250 lines of QML. Add tasks, tick them off, delete them with undo, filter the list, and find everything still there the next day.
+section: tutorial
+order: 0
+cover: tutorial/shot-final
+sources:
+  - label: Getting started with Kirigami
+    url: https://develop.kde.org/docs/getting-started/kirigami/
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="tutorial/shot-final"
+  alt="A to-do app: a header with the title Tasks, a Show menu and a Clear Completed button; a field to add a task; four tasks with checkboxes, the first ticked and struck through, each with a delete button; and a footer reading 3 tasks left"
+  caption="The finished app."
+  code={false}
+/>
+
+This tutorial builds the app above from an empty file. It has the same feature set as the well-known TodoMVC
+exercise:
+
+- add a task by typing and pressing Enter;
+- tick a task off, and untick it again;
+- delete a task, with a few seconds to undo;
+- see how many tasks are left;
+- show all tasks, only the open ones, or only the finished ones;
+- remove all finished tasks at once;
+- keep the list between sessions.
+
+The same file also works on a phone, with no extra code:
+
+<Example
+  name="tutorial/shot-phone"
+  alt="The same app in a narrow phone-shaped window. The Show and Clear Completed buttons have moved to a bar at the bottom."
+  caption="The finished app in phone mode. The actions moved to the bottom, where a thumb can reach them."
+  code={false}
+/>
+
+## What you need
+
+- **Qt 6 and Kirigami**, installed from your distribution. On a system running KDE Plasma they are already there.
+- **The `qml6` tool**, which runs a QML file directly. It is usually in a package named something like
+  `qt6-declarative-tools`, `qt6-qtdeclarative-devel` or `qml6`.
+- **KItemModels**, a small KDE library used from step 6 for filtering. It is part of KDE Frameworks and is
+  present on any Plasma system; elsewhere the package is usually called `kitemmodels` or `kf6-kitemmodels`.
+- **A text editor.** Kate has QML highlighting built in.
+
+No compiler, build system or project setup is needed. A real app that you ship would have a small C++ or Python
+launcher and a CMake file around it; the Kirigami tutorial linked at the bottom explains that part. Everything
+you learn here carries over unchanged.
+
+## How to follow along
+
+Create an empty folder with one file in it, `main.qml`. Each step tells you what to add or change, and why.
+After each step, run:
+
+```sh
+qml6 main.qml
+```
+
+Every step page ends with the complete file as it should look at that point, so if something does not work you
+can compare, or simply copy it and carry on.
+
+## The steps
+
+| | Step | You learn |
+| --- | --- | --- |
+| 1 | [A window and a page](/tutorial/step-1/) | The skeleton every Kirigami app starts from |
+| 2 | [A list of tasks](/tutorial/step-2/) | Models, list views and delegates |
+| 3 | [Adding tasks](/tutorial/step-3/) | Text input, actions, and a first function |
+| 4 | [Ticking off and deleting](/tutorial/step-4/) | Custom rows, changing data, undo |
+| 5 | [The empty state and a counter](/tutorial/step-5/) | Placeholder messages, a footer, reacting to changes |
+| 6 | [Filtering](/tutorial/step-6/) | Page actions, menus, a filter model |
+| 7 | [Remembering the list](/tutorial/step-7/) | Saving and loading |

@@ -1,0 +1,55 @@
+---
+// A real Kirigami render with its caption and the QML that produced it.
+import { Code } from 'astro:components';
+import { loadExample } from '../lib/examples';
+import Shot from './Shot.astro';
+
+interface Marker {
+  /** Position in percent of the screenshot's width and height. */
+  x: number;
+  y: number;
+  label: string;
+}
+
+interface Props {
+  name: string;
+  /** Describes the picture for people who cannot see it. */
+  alt: string;
+  caption?: string;
+  /** Set to false for pictures whose code would not help the reader. */
+  code?: boolean;
+  scale?: number;
+  /** Numbered callouts drawn over the screenshot, explained in a legend. */
+  markers?: Marker[];
+  /** Text of the link that reveals the code. */
+  codeLabel?: string;
+}
+
+const { name, alt, caption, code = true, scale, markers = [], codeLabel = 'Show the QML for this example' } = Astro.props;
+const example = loadExample(name);
+---
+
+<figure class="figure">
+  <div class="figure-stage">
+    <div class="figure-shot">
+      <Shot name={name} alt={alt} scale={scale} />
+      {
+        markers.map((m, i) => (
+          <span class="marker" style={`left:${m.x}%;top:${m.y}%`} aria-hidden="true">
+            {i + 1}
+          </span>
+        ))
+      }
+    </div>
+  </div>
+  {markers.length > 0 && <ol class="legend">{markers.map((m) => <li set:html={m.label} />)}</ol>}
+  {caption && <figcaption set:html={caption} />}
+  {
+    code && (
+      <details>
+        <summary>{codeLabel}</summary>
+        <Code code={example.code} lang="qml" themes={{ light: 'github-light', dark: 'github-dark' }} />
+      </details>
+    )
+  }
+</figure>

@@ -1,0 +1,102 @@
+---
+title: Simple by default
+summary: The first of KDE’s two design principles. A new user should be able to do the main thing your app is for without reading, configuring or guessing.
+section: patterns
+order: 5
+cover: components/placeholder-message
+sources:
+  - label: 'KDE HIG: Simple by default'
+    url: https://develop.kde.org/hig/simple_by_default/
+  - label: 'KDE HIG: What makes a KDE app a KDE app?'
+    url: https://develop.kde.org/hig/kde_app_design/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+KDE sums up its approach to design in one line: **simple by default, powerful when needed.** This page covers
+the first half. The second half is on [Powerful when needed](/patterns/power/).
+
+“Simple” here means that the common case, what most people do most of the time, is obvious and takes few steps.
+It does not mean leaving features out.
+
+## The first launch
+
+An app that opens to an empty window has already lost some people. Show something to act on.
+
+| Kind of app | What to show first |
+| --- | --- |
+| Creating things: a text editor, a drawing app | A blank document, ready to use |
+| Viewing things: a video player, a PDF reader | A prompt to open a file, or recent files |
+| Needing an account: chat, email | A prompt to sign in or create an account |
+| A tool: a calculator, a clock | The tool itself, with no setup |
+
+<Example
+  name="components/placeholder-message"
+  alt="An empty view with an icon, the text No devices found, a line explaining what to do, and a Search Again button"
+  caption="An empty view should say what belongs there and offer the next step."
+  code={false}
+/>
+
+- **Fill empty views** with a [placeholder message](/components/placeholder-message/): an icon, a short
+  explanation and, ideally, a button for the obvious next step.
+- **Explain unusual features in a sentence or two**, in the placeholder or at the top of the page, not in a
+  manual.
+- **Avoid setup wizards.** A wizard is justified only in a complex app, and only for setup that is truly required
+  before the app can work, or as an optional tour that can be skipped. Never use one to ask for preferences.
+
+## Shorten the common path
+
+- **Choose for the user when the choice is obvious.** Preselect the device used last time. If there is only one
+  option, skip the question.
+- **Use what you already know.** If the clipboard holds an email address when a new message is started, fill it in.
+- **Edit in place.** Rename an item where it stands, not in a separate dialog.
+
+## Show what matters, and only that
+
+<DoDont>
+  <Do sample="Save   Share   ⋮">
+    Keep the main actions visible and gather the rest behind one menu button.
+  </Do>
+  <Dont sample="▢ ▢ ▢ ▢ ▢ ▢ ▢ ▢ ▢ ▢ ▢ ▢">
+    Put every feature on the toolbar. When everything is visible, nothing stands out.
+  </Dont>
+</DoDont>
+
+- **Reduce button overload.** Combine related buttons into one menu button, or move groups of controls to their
+  own page.
+- **Let actions follow the content.** Actions set on a [page](/components/page/) appear only while that page is
+  shown, which keeps toolbars relevant without any effort.
+- **Never hide the main features** behind a menu, a hover effect, a keyboard shortcut or a gesture. Whatever can
+  only be reached that way must be something few people need.
+
+## Feel fast
+
+- Show a [progress indicator](/components/progress/) for anything that takes more than about a second.
+- Keep launch time short. A tool that takes long to open is not simple to use.
+
+## Look and behave like the rest of the system
+
+- **Use the standard values**: colours from [the theme](/foundations/colour/), distances and durations from
+  [the units](/foundations/spacing/), [icons](/foundations/icons/) by name. Custom styling makes an app feel
+  foreign and breaks with the user's settings.
+- **Choose a default window size at which everything fits**: no cut-off labels, no actions pushed into overflow
+  menus.
+- **Quit when the window is closed.** Do not linger as a system tray icon.
+
+## Be safe to explore
+
+People try things. Make sure trying is cheap: move to the trash instead of deleting, offer undo, and keep
+destructive actions out of the way of ordinary ones. The details are on
+[Feedback and status](/patterns/feedback/).
+
+## Remember, where it helps
+
+| Remember | When |
+| --- | --- |
+| Window size | Always |
+| Open documents, current view, scroll position | In project-based apps and document editors, where people return to the same work |
+| Nothing but a list of recent files | In small tools and in viewers where each session opens something different, such as a video player |

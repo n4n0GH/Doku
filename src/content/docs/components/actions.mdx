@@ -1,0 +1,127 @@
+---
+title: Actions and toolbars
+summary: An action describes something the user can do, once. Kirigami turns it into a toolbar button, a menu item or a context-menu entry as space allows.
+section: components
+order: 2
+cover: components/action-toolbar
+types: [Kirigami.Action, Kirigami.ActionToolBar]
+sources:
+  - label: 'Kirigami tutorial: Actions based components'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-actions/
+  - label: 'Kirigami tutorial: Action toolbars'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-actiontoolbar/
+  - label: 'KDE HIG: Getting input'
+    url: https://develop.kde.org/hig/getting_input/
+  - label: 'KDE HIG: Icons'
+    url: https://develop.kde.org/hig/icons/
+---
+
+import Example from '../../../components/Example.astro';
+import Callout from '../../../components/Callout.astro';
+
+In Kirigami you rarely place toolbar buttons by hand. You write an **action**: a small object that holds a label,
+an icon and what happens when it is triggered. Then you hand a list of actions to a component, and the component
+decides how to show them.
+
+```qml
+Kirigami.Action {
+    text: "Save"
+    icon.name: "document-save"
+    shortcut: StandardKey.Save
+    onTriggered: document.save()
+}
+```
+
+The benefit is that one description works everywhere. The same action can appear as a button with text on a wide
+window, an icon in a narrow one, and a menu entry on a phone.
+
+## Where actions go
+
+| Give a list of actions to… | They appear as… |
+| --- | --- |
+| A page (`actions`) | Buttons in the page header. See [Pages](/components/page/). |
+| `Kirigami.ActionToolBar` | Buttons in a toolbar you place yourself. |
+| `Kirigami.GlobalDrawer` | Entries in the sidebar. |
+| `Kirigami.Card` | Buttons along the bottom of the card. See [Cards](/components/cards/). |
+| `Kirigami.InlineMessage` | Buttons inside the message. See [Inline messages](/components/inline-message/). |
+| `Kirigami.MenuDialog` | A list of choices in a dialog. |
+
+## The action toolbar
+
+<Example
+  name="components/action-toolbar"
+  alt="The same five-button toolbar twice. The wide one shows New, Open, Save, Share and Print. The narrow one shows New and Open followed by a three-dot button."
+  caption="One list of five actions at two widths. What does not fit moves into the overflow menu behind the ⋮ button; nothing is cut off or lost."
+/>
+
+`Kirigami.ActionToolBar` is the component behind page headers, and you can use it on its own wherever you need a
+row of actions. Its main job is handling lack of space gracefully.
+
+Because actions can end up in the overflow menu, **every action needs both a text and an icon**, even one you
+expect to be shown as an icon only.
+
+## Steering the layout
+
+Each action can state a preference with `displayHint`.
+
+<Example
+  name="components/action-display-hints"
+  alt="A toolbar with a labelled Add Note button, a search icon without label, a Sort button with a small arrow, and a three-dot overflow button at the far end"
+  caption="Four actions, four hints. “Settings” is not visible because it asked to live in the overflow menu."
+/>
+
+| `Kirigami.DisplayHint.…` | Effect | Use it for |
+| --- | --- | --- |
+| `NoPreference` | The toolbar decides. This is the default. | Most actions. |
+| `KeepVisible` | Stays on the toolbar as long as at all possible. | The one or two actions that are the point of the page. |
+| `IconOnly` | Shown without its label. | Actions with a universally known icon: search, back, close. |
+| `AlwaysHide` | Only ever shown in the overflow menu. | Rarely used actions: settings, about, help. |
+
+### Menus
+
+An action with child actions becomes a button that opens a menu. Declare the children inside the parent, as the
+“Sort” action in the example does.
+
+## Using actions well
+
+- **Order by importance.** Actions overflow from the end of the list, so put the most used first.
+- **Label with a verb, in title case:** “Add Note”, not “Note” or “Add note”. See
+  [Typography and wording](/foundations/typography/).
+- **Do not reuse an icon** for two actions that are visible together.
+- **Do not hide what people need.** If an action is temporarily unavailable, set `enabled: false` so it stays
+  visible but greyed out. Use `visible: false` only when the action makes no sense in the current context.
+- **Give common actions their standard shortcut** with `StandardKey`, for example `StandardKey.Save`, so they follow
+  the user's shortcut settings.
+
+<Callout title="Which button type, when you do place one by hand?">
+  On a toolbar use `QQC2.ToolButton`. For a single round button floating over content use `QQC2.RoundButton` with
+  an icon only. Everywhere else use `QQC2.Button`.
+</Callout>
+
+## Properties you will use
+
+### Kirigami.Action
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The label. Always set it, even for icon-only actions. |
+| `icon.name` | string | Icon name from the icon theme. See [Icons](/foundations/icons/). |
+| `onTriggered` | handler | What happens when the action is used. |
+| `shortcut` | key sequence | Keyboard shortcut. |
+| `tooltip` | string | Extra explanation shown on hover. |
+| `enabled` | bool | `false` greys the action out. |
+| `visible` | bool | `false` removes it everywhere. |
+| `checkable`, `checked` | bool | Makes the action a toggle. |
+| `displayHint` | enum | Layout preference, see the table above. |
+| `separator` | bool | Turns this entry into a dividing line between groups. |
+| `displayComponent` | component | Replaces the button with your own item, for example a search field. |
+
+### Kirigami.ActionToolBar
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `actions` | list of actions | The actions to show. |
+| `alignment` | alignment | Which side the buttons gather on, for example `Qt.AlignRight`. |
+| `display` | enum | Default look of each button: text beside icon, icon only, and so on. |
+| `flat` | bool | `true` (default) draws buttons without a frame, as on a toolbar. |
+| `overflowIconName` | string | Icon of the overflow button. Default is `overflow-menu`. |

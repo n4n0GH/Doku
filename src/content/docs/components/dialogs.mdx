@@ -1,0 +1,144 @@
+---
+title: Dialogs
+summary: A dialog interrupts the user to get a decision. Use one only when the app cannot continue without an answer.
+section: components
+order: 13
+cover: components/prompt-dialog
+types: [Kirigami.PromptDialog, Kirigami.Dialog, Kirigami.MenuDialog, Kirigami.OverlaySheet]
+sources:
+  - label: 'KDE HIG: Displaying content'
+    url: https://develop.kde.org/hig/displaying_content/
+  - label: 'KDE HIG: Getting input'
+    url: https://develop.kde.org/hig/getting_input/
+  - label: 'KDE HIG: Text and labels'
+    url: https://develop.kde.org/hig/text_and_labels/
+  - label: 'Kirigami tutorial: Dialog types'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-dialogs/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+<Example
+  name="components/prompt-dialog"
+  alt="A dialog over a dimmed page. It has a warning icon, the title Delete Note, a line saying Meeting notes will be moved to the trash, and Cancel and Delete buttons"
+  caption="A <code>Kirigami.PromptDialog</code> asking for confirmation."
+  scale={0.9}
+  markers={[
+    { x: 20.5, y: 36, label: '<strong>Icon.</strong> Set by <code>dialogType</code>; here a warning.' },
+    { x: 54, y: 41, label: '<strong>Title.</strong> Starts with a verb and names the action being confirmed.' },
+    { x: 36, y: 55, label: '<strong>Subtitle.</strong> What exactly will happen, naming the thing affected.' },
+    { x: 46, y: 61, label: '<strong>Buttons.</strong> A way out, and the action itself, labelled with the same verb as the title.' },
+  ]}
+/>
+
+## Do you need a dialog?
+
+A dialog stops everything until it is answered. That is appropriate only when the app needs an **immediate
+decision**, or must show the **progress of a task that has to finish** before work can continue.
+
+| You want to… | Use |
+| --- | --- |
+| Show content that fills the window | Push a new [page](/components/page/) |
+| Tell the user something without needing an answer | An [inline message](/components/inline-message/) |
+| Show extra read-only content that may scroll, such as details or a licence | `Kirigami.OverlaySheet` |
+| Ask a yes-or-no question, or ask for one short value | `Kirigami.PromptDialog` |
+| Offer a short list of actions to choose from | `Kirigami.MenuDialog` |
+| Anything else that needs input in a popup | `Kirigami.Dialog` with your own content |
+| Let the user choose a file or folder | `FileDialog` from `QtQuick.Dialogs`. Never build your own. |
+
+<Callout title="One at a time" kind="warning">
+  Never show more than one dialog at once, and never open a dialog from a dialog. If a step needs a follow-up
+  question, the flow is too complicated for dialogs; use a page.
+</Callout>
+
+`Kirigami.OverlaySheet` is for reading only. Do not put input fields in a sheet; use a dialog for input.
+
+## Writing a good dialog
+
+<DoDont>
+  <Do sample="Delete Note  ·  [Cancel] [Delete]">
+    Title the dialog with the action and label the button with the same verb. People can answer without reading
+    the body.
+  </Do>
+  <Dont sample="Are you sure?  ·  [No] [Yes]">
+    Ask a generic question with Yes and No. The buttons mean nothing on their own, so every word must be read
+    every time.
+  </Dont>
+</DoDont>
+
+- **The title starts with an imperative verb** and repeats the control that opened the dialog: the menu item
+  “Delete…” opens “Delete Note”. Titles use title case.
+- **Name the thing affected** in the subtitle: “‘Meeting notes’ will be moved to the trash.”
+- **Always offer a way out** that changes nothing: a Cancel button.
+- **Mark destructive buttons with the right icon**, such as `edit-delete`. See [Icons](/foundations/icons/).
+- **Prefer undo to confirmation.** If an action can be reversed, do it at once and offer “Undo” instead of asking
+  first. Keep confirmation dialogs for what cannot be taken back.
+
+## In code
+
+Declare the dialog once, and call `open()` on it when needed:
+
+```qml
+Kirigami.PromptDialog {
+    id: deleteDialog
+
+    title: "Delete Note"
+    subtitle: "“Meeting notes” will be moved to the trash."
+    dialogType: Kirigami.PromptDialog.Warning
+    standardButtons: Kirigami.Dialog.Cancel
+
+    customFooterActions: Kirigami.Action {
+        text: "Delete"
+        icon.name: "edit-delete"
+        onTriggered: {
+            notesModel.remove(currentNote)
+            deleteDialog.close()
+        }
+    }
+}
+
+QQC2.Button {
+    text: "Delete…"
+    onClicked: deleteDialog.open()
+}
+```
+
+Two kinds of buttons can go in the footer:
+
+- **`standardButtons`** are ready-made, translated buttons such as `Kirigami.Dialog.Ok`, `Cancel`, `Save` or
+  `Close`. Combine them with `|`. They fire `onAccepted` or `onRejected` and close the dialog.
+- **`customFooterActions`** are your own [actions](/components/actions/), for when a standard button does not say
+  the right thing. A custom action does not close the dialog by itself.
+
+To ask for one short value, put a text field inside a `PromptDialog`; it appears under the subtitle.
+
+## Properties you will use
+
+### Kirigami.Dialog (and everything based on it)
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `title` | string | Heading of the dialog. |
+| `standardButtons` | flags | Ready-made footer buttons. |
+| `customFooterActions` | list of actions | Your own footer buttons. |
+| `showCloseButton` | bool | Shows a × in the corner. Default `true`. |
+| `preferredWidth`, `preferredHeight` | number | Size the dialog would like to have. Use grid units. |
+| `maximumWidth`, `maximumHeight` | number | Size the dialog will not exceed. It never grows past the window. |
+| `onAccepted`, `onRejected` | handlers | Run when a standard button confirms or cancels. |
+
+### Extra on Kirigami.PromptDialog
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `subtitle` | string | The message under the title. |
+| `dialogType` | enum | `None` (default), `Information`, `Success`, `Warning` or `Error`. Adds the matching icon. |
+
+### Kirigami.MenuDialog
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `actions` | list of actions | The choices, shown as a list. |

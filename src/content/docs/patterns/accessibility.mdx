@@ -1,0 +1,108 @@
+---
+title: Accessibility and inclusion
+summary: A checklist for finding out whether everyone can use your app, and wording that does not shut anyone out.
+section: patterns
+order: 7
+cover: foundations/colour-status
+sources:
+  - label: 'KDE HIG: Accessibility and inclusiveness'
+    url: https://develop.kde.org/hig/accessibility/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+Most accessibility problems are found the same way: by using your app for a few minutes the way someone else
+has to. Kirigami and Qt Quick Controls handle a great deal for you. These tests show where your own code has
+undone that.
+
+## Eight tests
+
+### 1. Keyboard only
+
+Unplug the mouse or switch off the touchpad, then do everything your app can do.
+
+- Can every control be reached and operated?
+- When a page or dialog opens, is the focus somewhere sensible?
+- Can you always see where the focus is, and tell it apart from an item that is merely selected?
+
+In lists that people search by typing, put the distinctive word first: “Germany (Europe)”, not “Europe/Germany”.
+
+### 2. One mouse button, no keyboard
+
+Use only left-clicks and the on-screen keyboard. Every drag must show what is being dragged, and must either
+work or show a “not allowed here” cursor; a drag should never silently do nothing.
+
+### 3. Touch only
+
+Use a touchscreen and nothing else. The on-screen keyboard should appear when a text field is tapped, and only
+then. Anything shown in a hover tooltip must also appear on press-and-hold.
+
+### 4. A different colour scheme
+
+Switch the system to Breeze Dark, then to a high-contrast scheme. Anything that stays the wrong colour is a
+hard-coded value. See [Colour](/foundations/colour/).
+
+### 5. Larger text
+
+Set the system font size to 14. Text must not be cut off, and things must still line up. Layouts built with
+[the units](/foundations/spacing/) pass this without changes.
+
+### 6. No sound
+
+Mute the speakers. Nothing may be communicated by sound alone.
+
+### 7. A screen reader
+
+Turn on the Orca screen reader and move through your app. Each control should be announced with its name and
+its kind: “Create New Folder, button”.
+
+- Icon-only buttons need a `text` even though it is not shown. See [Icons](/foundations/icons/).
+- No two controls in one window should have the same name.
+- For custom items, set the `Accessible.name` and `Accessible.role` attached properties.
+
+### 8. No animations
+
+Turn animations off in System Settings. Things that normally slide or fade should simply switch; a spinner
+should become a still image. Using [the duration units](/foundations/spacing/) gives you this for free.
+
+Apart from the text cursor, nothing in an interface should blink.
+
+<Callout title="The one rule behind several of these">
+  Never let a single channel carry the message. Not colour alone, not sound alone, not a hover tooltip alone.
+  Whatever matters must be available at least two ways.
+</Callout>
+
+## Words that include
+
+Interface text is read by people of every age, background and ability. Avoid assuming things about the reader:
+what their body can do, how they live, what hardware they own, how much they know.
+
+| Instead of | Write | Why |
+| --- | --- | --- |
+| house, apartment | home | Not everyone lives in one or the other. |
+| computer, phone, device | system | The app may be running on any of them. |
+
+### Calmer words
+
+Software jargon is full of violent or loaded terms. Plain ones are clearer and kinder.
+
+| Instead of | Write |
+| --- | --- |
+| Kill | Close |
+| Execute | Run |
+| Abort | Exit |
+| Fatal | Critical |
+| Force | Require |
+| Illegal | Unauthorized |
+| Crippled | Broken |
+| End of life | End of support |
+| Wiped out | Cleared |
+
+Icons carry culture too. A symbol that is obvious in one country can be meaningless or rude in another; icon
+themes can provide localised variants.
+
+More wording rules are on [Typography and wording](/foundations/typography/).

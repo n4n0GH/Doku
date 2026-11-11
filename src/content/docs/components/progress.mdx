@@ -1,0 +1,103 @@
+---
+title: Progress and loading
+summary: Three ways to show that the app is busy, depending on whether you know how long it will take and how much of the screen is waiting.
+section: components
+order: 12
+cover: components/loading-placeholder
+types: [QQC2.ProgressBar, QQC2.BusyIndicator, Kirigami.LoadingPlaceholder]
+sources:
+  - label: 'Kirigami tutorial: Progress bars and indicators'
+    url: https://develop.kde.org/docs/getting-started/kirigami/components-progressbars/
+  - label: 'KDE HIG: Simple by default'
+    url: https://develop.kde.org/hig/simple_by_default/
+---
+
+import Example from '../../../components/Example.astro';
+import DoDont from '../../../components/DoDont.astro';
+import Do from '../../../components/Do.astro';
+import Dont from '../../../components/Dont.astro';
+import Callout from '../../../components/Callout.astro';
+
+Anything that takes longer than about a second needs a sign that work is going on. Without one, people assume
+the app has frozen and click again.
+
+<Example
+  name="components/progress"
+  alt="A progress bar filled a little over half, labelled Known amount, and below it a spinning indicator labelled Unknown amount"
+  caption="<code>QQC2.ProgressBar</code> and <code>QQC2.BusyIndicator</code>."
+/>
+
+## Which one
+
+| Situation | Use |
+| --- | --- |
+| You know how far along the task is | `QQC2.ProgressBar` |
+| You cannot know, or it is very short | `QQC2.BusyIndicator` |
+| A whole view or page has nothing to show yet | `Kirigami.LoadingPlaceholder` |
+
+**Prefer a real measure whenever one exists.** A bar that fills tells people how long to wait and proves the
+app is not stuck; a spinner only says “not yet”.
+
+## Loading placeholder
+
+<Example
+  name="components/loading-placeholder"
+  alt="Centred in an empty area: the text Importing photos, a smaller line reading 312 of 840, and a progress bar about a third full"
+  caption="A loading placeholder with a known amount of progress."
+/>
+
+`Kirigami.LoadingPlaceholder` goes in the middle of a view that is still loading, in the same spot where a
+[placeholder message](/components/placeholder-message/) would go if the view turned out to be empty. It has a
+main text, an optional explanation, and an indicator.
+
+```qml
+Kirigami.LoadingPlaceholder {
+    anchors.centerIn: parent
+    visible: importer.running
+
+    text: "Importing photos…"
+    explanation: importer.done + " of " + importer.total
+
+    determinate: true
+    progressBar.value: importer.done / importer.total * 100
+}
+```
+
+Without `determinate: true` it shows an indicator with no fill level, for when the amount is unknown. The
+built-in bar runs from 0 to 100.
+
+## Using them well
+
+- **Say what is happening**, with a verb ending in “…”: “Importing photos…”, “Connecting…”.
+- **Give numbers when you have them**: “312 of 840”, “2 minutes left”. Technical detail is fine here.
+- **Put the indicator where the result will appear**, not in a far corner.
+- **Do not block the whole window** for work that only concerns one part of it.
+- **Switch from spinner to bar** as soon as the total becomes known. A progress bar can start with
+  `indeterminate: true` and change.
+- **When loading finishes with nothing to show**, replace the loading placeholder with a placeholder message
+  that says so.
+
+## Properties you will use
+
+### QQC2.ProgressBar
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `from`, `to` | number | The values that mean empty and full. |
+| `value` | number | Current progress between the two. |
+| `indeterminate` | bool | `true` shows activity without a fill level. |
+
+### QQC2.BusyIndicator
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `running` | bool | Whether it spins. Bind it to your “busy” condition. |
+
+### Kirigami.LoadingPlaceholder
+
+| Property | Type | What it does |
+| --- | --- | --- |
+| `text` | string | The main line. |
+| `explanation` | string | Smaller text under it. |
+| `determinate` | bool | `true` when progress is known. Default `false`. |
+| `progressBar.value` | number | Progress from 0 to 100, used when `determinate` is `true`. |
